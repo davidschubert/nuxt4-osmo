@@ -16,11 +16,33 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  colorMode: {
+    preference: 'dark'
+  },
+
+  // Server-side runtime config (secrets)
+  runtimeConfig: {
+    stripeSecretKey: '',
+    stripeWebhookSecret: '',
+    appwriteApiKey: '',
+    // Public keys (exposed to client)
+    public: {
+      stripePriceId: '',
+      appUrl: 'http://localhost:3000'
+    }
+  },
+
   routeRules: {
     '/': { prerender: true }
   },
 
   compatibilityDate: '2025-01-15',
+
+  // Appwrite configuration
+  appwrite: {
+    endpoint: process.env.NUXT_PUBLIC_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1',
+    project: process.env.NUXT_PUBLIC_APPWRITE_PROJECT || ''
+  },
 
   eslint: {
     config: {
