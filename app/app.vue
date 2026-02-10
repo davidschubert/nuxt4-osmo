@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { APP } from '~/utils/constants'
 
+// Initialize auth state on app startup
+const { init: initAuth } = useAuth()
+onMounted(() => {
+  initAuth()
+})
+
 useHead({
   meta: [
     { name: 'viewport', content: 'width=device-width, initial-scale=1' }

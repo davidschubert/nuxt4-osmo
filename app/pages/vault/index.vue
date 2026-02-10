@@ -1,10 +1,19 @@
 <script setup lang="ts">
 definePageMeta({
-  layout: 'vault'
+  layout: 'vault',
+  middleware: 'auth'
 })
 
 useSeoMeta({
   title: 'The Vault - Browse Resources'
+})
+
+const { user } = useAuth()
+
+const greeting = computed(() => {
+  if (!user.value) return 'Hello'
+  const firstName = user.value.displayName.split(' ')[0]
+  return `Hello ${firstName}`
 })
 </script>
 
@@ -12,7 +21,7 @@ useSeoMeta({
   <div class="p-6">
     <div class="text-center mb-8">
       <p class="text-sm text-muted mb-2">
-        Hello David
+        {{ greeting }}
       </p>
       <h1 class="text-4xl md:text-5xl font-bold mb-6">
         Welcome to<br>the Vault

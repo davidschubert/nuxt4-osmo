@@ -70,32 +70,7 @@ const extraNavItems = computed(() => {
       />
 
       <template #footer>
-        <div class="flex items-center gap-2 px-2 py-1">
-          <UAvatar
-            size="sm"
-            text="DS"
-          />
-          <div class="flex-1 min-w-0 group-data-[collapsed]/sidebar:hidden">
-            <p class="text-sm font-medium truncate">
-              David Schubert
-            </p>
-          </div>
-          <UDropdownMenu
-            :items="[
-              [{ label: 'Account', icon: 'i-lucide-user' }],
-              [{ label: 'Dark mode', icon: 'i-lucide-moon' }],
-              [{ label: 'Logout', icon: 'i-lucide-log-out' }]
-            ]"
-          >
-            <UButton
-              icon="i-lucide-ellipsis-vertical"
-              variant="ghost"
-              color="neutral"
-              size="xs"
-              class="group-data-[collapsed]/sidebar:hidden"
-            />
-          </UDropdownMenu>
-        </div>
+        <AppUserMenu />
       </template>
     </UDashboardSidebar>
 
