@@ -80,7 +80,6 @@ Reference screenshots from the original OSMO Supply app are stored in `docs/refe
 | State | Pinia (@pinia/nuxt) | 0.11.3 |
 | Backend | Appwrite (appwrite SDK) | 22.0.0 |
 | Payments | Stripe | TBD |
-| Content | @nuxt/content | 3.11.2 |
 | Images | @nuxt/image | 2.0.0 |
 | Scripts | @nuxt/scripts | 0.13.2 |
 | Icons | Lucide + Simple Icons (Iconify) | - |
@@ -430,3 +429,45 @@ interface UserProfile {
 8. **Category counts**: Computed client-side from resources list or cached via Appwrite function. Not a static stored field.
 9. **No SSR auth**: Auth is client-side only via the `appwrite` Web SDK. Middleware auth checks run client-side.
 10. **Stripe webhooks = source of truth**: Client never directly modifies subscription state.
+
+## Project Roadmap
+
+### Abgeschlossene Phasen
+
+| Phase | Beschreibung | Status |
+|-------|-------------|--------|
+| 1 | Foundation (Types, Layouts, Mock-Daten, Dark Theme) | ✅ Done |
+| 2 | Landing Page & Public Pages (Hero, Features, Pricing) | ✅ Done |
+| 3 | Auth (Login, Register, OAuth, Middleware, Stores) | ✅ Done |
+| 4 | Vault Core (Sidebar, Card Grid, Kategorien, Filtering) | ✅ Done |
+| 5 | Resource Detail (Preview, Code Steps, Meta Sidebar, Lock) | ✅ Done |
+| 6 | Search (Command Palette, Meta+K, Keyboard Navigation) | ✅ Done |
+| 7 | Appwrite Anbindung (Dual-Mode Composables, SDK Migration) | ✅ Done |
+
+### Offene Phasen
+
+**Phase 8: Admin Panel**
+- Admin Layout + Middleware (Appwrite Team/Label Check)
+- Resource CRUD (UTable, Create/Edit Formular, Thumbnail Upload)
+- Category Management (Name, Slug, Icon, Sort Order)
+- Admin Dashboard (Übersicht: Ressourcen-Count, User-Count)
+
+**Phase 9: Stripe & Premium**
+- Stripe Checkout Endpoint + Webhook Endpoint
+- Subscription Composable (Status lesen, Checkout starten, Portal öffnen)
+- Pricing Page verknüpfen, Premium Gating aktivieren
+- node-appwrite Server SDK für Webhook-Updates
+- Customer Portal + Success/Cancel Pages
+
+**Phase 10: Polish & UX**
+- SEO Meta Tags (useSeoMeta für alle Seiten)
+- Error Handling (Error Boundary, 404, Toast-Fehler)
+- Loading States (Skeleton-Loader)
+- Responsive Design, Accessibility, Performance
+- Image Optimization (@nuxt/image), Animations
+
+**Phase 11: Testing & Deployment**
+- TypeCheck + ESLint Clean + Production Build Test
+- E2E Flow Testing (Register → Login → Browse → Checkout → Premium)
+- Deployment Config (Vercel/Cloudflare/Netlify)
+- CI/CD Pipeline, Domain + SSL, Stripe Live Mode

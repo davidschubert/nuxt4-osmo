@@ -55,6 +55,7 @@ export function useAuth() {
           const savedSession = localStorage.getItem('vault-mock-session')
           if (savedSession) {
             authStore.setUser(JSON.parse(savedSession) as UserProfile)
+            authStore.setAccountLabels(['admin'])
           }
         }
       } else {
@@ -71,6 +72,7 @@ export function useAuth() {
         } catch {
           // Profile may not exist yet for new users
         }
+        authStore.setAccountLabels((user as unknown as Record<string, string[]>).labels ?? [])
         authStore.setUser(mapAppwriteUser(user as unknown as Record<string, unknown>, profile))
       }
     } catch {
@@ -98,6 +100,7 @@ export function useAuth() {
           displayName: email.split('@')[0] || mockUser.displayName
         }
         authStore.setUser(user)
+        authStore.setAccountLabels(['admin'])
         if (import.meta.client) {
           localStorage.setItem('vault-mock-session', JSON.stringify(user))
         }
@@ -105,6 +108,7 @@ export function useAuth() {
         const { account, databases } = useAppwrite()
         await account.createEmailPasswordSession({ email, password })
         const user = await account.get()
+        authStore.setAccountLabels((user as unknown as Record<string, string[]>).labels ?? [])
         let profile: Record<string, unknown> | null = null
         try {
           profile = await databases.getDocument({
@@ -146,6 +150,7 @@ export function useAuth() {
           email
         }
         authStore.setUser(user)
+        authStore.setAccountLabels(['admin'])
         if (import.meta.client) {
           localStorage.setItem('vault-mock-session', JSON.stringify(user))
         }
@@ -156,6 +161,7 @@ export function useAuth() {
         // Auto-login after registration
         await account.createEmailPasswordSession({ email, password })
         const user = await account.get()
+        authStore.setAccountLabels((user as unknown as Record<string, string[]>).labels ?? [])
         // Create user profile document (for subscription tracking)
         try {
           await databases.createDocument({
@@ -230,6 +236,7 @@ export function useAuth() {
           displayName: `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`
         }
         authStore.setUser(user)
+        authStore.setAccountLabels(['admin'])
         if (import.meta.client) {
           localStorage.setItem('vault-mock-session', JSON.stringify(user))
         }
@@ -265,6 +272,7 @@ export function useAuth() {
     loginWithOAuth,
     user: computed(() => authStore.user),
     isAuthenticated: computed(() => authStore.isAuthenticated),
+    isAdmin: computed(() => authStore.isAdmin),
     isSubscribed: computed(() => authStore.isSubscribed),
     loading: computed(() => authStore.loading),
     initialized: computed(() => authStore.initialized)
