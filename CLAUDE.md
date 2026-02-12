@@ -6,6 +6,70 @@ SaaS resource library platform ("The Vault") inspired by OSMO Supply. Users brow
 
 Dark-first UI with card-based grid layout.
 
+## UI Reference (OSMO Supply)
+
+Reference screenshots from the original OSMO Supply app are stored in `docs/reference-screenshots/`. These serve as the visual target for all UI implementation. Always consult these when building UI components.
+
+### Screenshot Index
+
+| # | File | Screen | Key UI Elements |
+|---|------|--------|-----------------|
+| 01 | `01-vault-main-menu-open.png` | Vault main, sidebar open | Logo + green star top-left. Sidebar: "The Vault" expandable section with categories (name + count badge). Below: Icons, Learn, Easings ("Soon" badge). Content: greeting "Hello David", "Welcome to the Vault" hero text, search input "Search 152 resources", handwritten "Type and find!" annotation. 5-column card grid with thumbnails + "New" badges. User name + 3-dot menu bottom-left. Search (Cmd+K) + bookmark icon top-right. |
+| 02 | `02-vault-main-menu-closed.png` | Vault main, sidebar collapsed | Sidebar shows only narrow icon strip (no text labels). Same content but wider. Green star visible, category icons only. |
+| 03 | `03-vault-main-user-menu-open.png` | User menu popup | Bottom-left popup: "Lifetime Member" badge, "Dark mode" toggle (active), "Join Community (Discord)", "License + Invoices (Stripe)", "Settings". Triggered by 3-dot menu on user name. |
+| 04 | `04-vault-main-light-mode-switch.png` | Light mode | Full app in light theme. Sidebar has light background. User menu open with "Light mode" toggle active (purple icon). Cards have lighter thumbnails. |
+| 05 | `05-account-profile.png.png` | Account modal: Profile | Modal dialog over vault background. Left: vertical tabs (Profile, Account, Plan, Billing). Right: avatar photo + "Remove profile photo", NAME + "Change name", EMAIL + "Change email", PASSWORD + "Change password". |
+| 06 | `06-account-account.png` | Account modal: Account | Address section: "BILLING ADDRESS" (street, city, country) + "Change address". Organization section: ORGANIZATION name, TAX ID, INVOICE NOTES + "Change organization". |
+| 07 | `07-account-plan.png` | Account modal: Plan | "Lifetime Member", "Billed once", 599.00 EUR, "Change plan" link, "Edit options" link. Minimal layout. |
+| 08 | `08-account-billing.png` | Account modal: Billing | Payment info: card icon + "Mastercard Ending in 7307 Expires 5/2026" + Update/Remove. Discount: "Add a discount code". Invoices: table (Date, Status, Amount) + download icon. "Edit recipients" button. |
+| 09 | `09-vault-search-active.png` | Search overlay | Search field focused center-screen: "Search for pages or resources", filter icon + "Enter". Background dimmed (overlay). Sidebar visible but grayed out. |
+| 10 | `10-vault-category-buttons.png` | Category view: Buttons | Breadcrumb "The Vault > Buttons". Title "Buttons" with superscript count "15". Grid shows category-specific resources. Each card has colored background matching the button type. Sidebar highlights "Buttons" as active category. |
+| 11 | `11-resource-detail-top.png` | Resource detail: top | Breadcrumb "The Vault > Buttons > Elastic Pulse Button (Bouncy)". Title. Top-right: "Live preview" button (red indicator), Figma icon, bookmark, 3-dot menu. Large preview area (light pink bg, orange buttons). Right sidebar: "Resource details" (Last updated, Category, Need help?: Join Slack), Tags (Button, Bounce, Hover, Animation, Elastic, Blob, Pulse), "Original source" link, Author with avatar. Below preview: "Documentation" with tabs "Webflow" / "Code". Setup: External Scripts section. |
+| 12 | `12-resource-code-html-css.png` | Resource detail: HTML+CSS | "Step 1: Add HTML" with code block (syntax highlighting, Copy button top-right). "Step 2: Add CSS" with CSS code block. Dark theme code blocks with colored syntax. Right sidebar identical to 11. |
+| 13 | `13-resource-code-js.png` | Resource detail: JavaScript | "Step 3: Add Javascript" with full JS code block. Below: "Implementation" docs with sections: Container, Target, Stretch. Inline code blocks in descriptions. |
+| 14 | `14-resource-implementation.png` | Resource detail: bottom | JS init code block, Implementation docs (Container, Target, Stretch, Lock sections), "Related resources" grid with 2 cards. |
+
+### Critical UI Patterns (from screenshots)
+
+**Account = Modal Dialog, NOT a separate page**
+- Opens as overlay on top of vault
+- Vertical tab navigation: Profile, Account, Plan, Billing
+- Use `UModal` + `UTabs` with vertical orientation
+- Renders in light mode style (white background) even when app is in dark mode
+
+**User Menu = Sidebar Popup**
+- Triggered by 3-dot menu next to user name at bottom of sidebar
+- Shows: subscription status badge, dark mode toggle, community links, settings
+- Use `UDropdownMenu` or `UPopover` anchored to sidebar footer
+
+**Sidebar = Collapsible**
+- Open state: icon + label + count badge for each category
+- Collapsed state: only icons, no text
+- `UDashboardSidebar` with `collapsible` + `resizable` props
+
+**Search = Full-Screen Overlay**
+- Centered search input with dimmed background
+- Placeholder: "Search for pages or resources"
+- Filter icon + keyboard shortcut hint
+- Use `UDashboardSearch` (Meta+K trigger)
+
+**Resource Detail = 3-Column Layout**
+- Left: sidebar (same as vault)
+- Center: preview + documentation/code (scrollable)
+- Right: resource metadata sidebar (fixed)
+- Code presented as numbered steps: "Step 1: Add HTML", "Step 2: Add CSS", "Step 3: Add Javascript"
+- Each code block has language label top-left + Copy button top-right
+
+**Category Page = Breadcrumb + Count**
+- Breadcrumb: "The Vault > {Category}"
+- Title with superscript count badge
+- Same grid layout as main vault but filtered
+
+**Card Grid = 5 Columns**
+- Responsive: 5 cols on desktop, fewer on smaller screens
+- Each card: thumbnail (colored background), optional "New" badge, title below
+- Thumbnail aspect ratio ~4:3
+
 ## Tech Stack
 
 | Layer | Technology | Version |
@@ -65,7 +129,7 @@ app/
 │   │   ├── index.vue           # Main vault grid (all resources)
 │   │   └── [slug].vue          # Resource detail page
 │   ├── pricing.vue             # Pricing/subscription page
-│   └── account.vue             # User account/profile
+│   └── account.vue             # User account/profile (NOTE: OSMO uses a modal, consider UModal)
 ├── stores/
 │   ├── auth.ts                 # Pinia auth store (exports useAuthStore)
 │   └── vault.ts                # Pinia vault/resource store (exports useVaultStore)
