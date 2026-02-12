@@ -1,4 +1,4 @@
-import type { Resource, Category, UserProfile } from '~/types'
+import type { Resource, ResourceCode, Category, UserProfile } from '~/types'
 
 // Mock categories matching OSMO Supply sidebar
 export const mockCategories: Category[] = [
@@ -74,7 +74,7 @@ export const mockCategories: Category[] = [
   }
 ]
 
-// Mock resources with realistic data inspired by OSMO Supply
+// Mock resources – metadata only (code lives in mockResourceCodes)
 export const mockResources: Resource[] = [
   {
     $id: 'res-1',
@@ -88,6 +88,156 @@ export const mockResources: Resource[] = [
     thumbnailFileId: '',
     isFree: true,
     isNew: true,
+    externalScripts: ['https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js'],
+    originalSourceUrl: 'https://osmo.supply',
+    authorName: 'Dennis Snellenberg',
+    sortOrder: 1
+  },
+  {
+    $id: 'res-2',
+    $createdAt: '2025-12-15T10:00:00.000Z',
+    $updatedAt: '2025-12-15T10:00:00.000Z',
+    title: 'Button with Slanted Reveal',
+    slug: 'button-slanted-reveal',
+    description: 'A button with a slanted background reveal effect on hover.',
+    category: 'cat-buttons',
+    tags: ['Button', 'Hover', 'Reveal', 'CSS', 'Transform'],
+    thumbnailFileId: '',
+    isFree: true,
+    isNew: true,
+    sortOrder: 2
+  },
+  {
+    $id: 'res-3',
+    $createdAt: '2025-12-14T10:00:00.000Z',
+    $updatedAt: '2025-12-14T10:00:00.000Z',
+    title: 'Tilting Bouncing Button',
+    slug: 'tilting-bouncing-button',
+    description: 'A button that tilts and bounces on hover using GSAP.',
+    category: 'cat-buttons',
+    tags: ['Button', 'Tilt', 'Bounce', 'GSAP', 'Hover'],
+    thumbnailFileId: '',
+    isFree: false,
+    isNew: false,
+    externalScripts: ['https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js'],
+    sortOrder: 3
+  },
+  {
+    $id: 'res-4',
+    $createdAt: '2025-12-13T10:00:00.000Z',
+    $updatedAt: '2025-12-13T10:00:00.000Z',
+    title: 'Side by Side Page Transition',
+    slug: 'side-by-side-page-transition',
+    description: 'A smooth side-by-side page transition effect for multi-page websites.',
+    category: 'cat-utilities',
+    tags: ['Transition', 'Page', 'Animation', 'GSAP'],
+    thumbnailFileId: '',
+    isFree: true,
+    isNew: true,
+    externalScripts: ['https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js'],
+    sortOrder: 4
+  },
+  {
+    $id: 'res-5',
+    $createdAt: '2025-12-12T10:00:00.000Z',
+    $updatedAt: '2025-12-12T10:00:00.000Z',
+    title: 'Page Name Transition (Wipe)',
+    slug: 'page-name-transition-wipe',
+    description: 'A wipe transition that reveals the page name during navigation.',
+    category: 'cat-utilities',
+    tags: ['Transition', 'Wipe', 'Page Name', 'GSAP'],
+    thumbnailFileId: '',
+    isFree: true,
+    isNew: true,
+    externalScripts: ['https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js'],
+    sortOrder: 5
+  },
+  {
+    $id: 'res-6',
+    $createdAt: '2025-12-11T10:00:00.000Z',
+    $updatedAt: '2025-12-11T10:00:00.000Z',
+    title: 'Magnetic Hover Effect',
+    slug: 'magnetic-hover-effect',
+    description: 'Elements that magnetically follow the cursor on hover.',
+    category: 'cat-cursor',
+    tags: ['Cursor', 'Magnetic', 'Hover', 'GSAP', 'Interactive'],
+    thumbnailFileId: '',
+    isFree: false,
+    isNew: false,
+    externalScripts: ['https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js'],
+    sortOrder: 6
+  },
+  {
+    $id: 'res-7',
+    $createdAt: '2025-12-10T10:00:00.000Z',
+    $updatedAt: '2025-12-10T10:00:00.000Z',
+    title: 'Line Reveal Testimonials',
+    slug: 'line-reveal-testimonials',
+    description: 'Testimonial cards with a line-by-line reveal animation on scroll.',
+    category: 'cat-scroll',
+    tags: ['Scroll', 'Reveal', 'Testimonials', 'GSAP', 'ScrollTrigger'],
+    thumbnailFileId: '',
+    isFree: true,
+    isNew: false,
+    externalScripts: [
+      'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js',
+      'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js'
+    ],
+    sortOrder: 7
+  },
+  {
+    $id: 'res-8',
+    $createdAt: '2025-12-09T10:00:00.000Z',
+    $updatedAt: '2025-12-09T10:00:00.000Z',
+    title: 'Mini Showreel Player',
+    slug: 'mini-showreel-player',
+    description: 'A compact video player component with custom play/pause controls.',
+    category: 'cat-video',
+    tags: ['Video', 'Player', 'Showreel', 'Custom Controls'],
+    thumbnailFileId: '',
+    isFree: true,
+    isNew: false,
+    sortOrder: 8
+  },
+  {
+    $id: 'res-9',
+    $createdAt: '2025-12-08T10:00:00.000Z',
+    $updatedAt: '2025-12-08T10:00:00.000Z',
+    title: 'Two-step Scaling Navigation',
+    slug: 'two-step-scaling-navigation',
+    description: 'A full-screen navigation menu with a two-step scaling animation.',
+    category: 'cat-navigation',
+    tags: ['Navigation', 'Menu', 'Scale', 'GSAP', 'Fullscreen'],
+    thumbnailFileId: '',
+    isFree: false,
+    isNew: false,
+    externalScripts: ['https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js'],
+    sortOrder: 9
+  },
+  {
+    $id: 'res-10',
+    $createdAt: '2025-12-07T10:00:00.000Z',
+    $updatedAt: '2025-12-07T10:00:00.000Z',
+    title: 'Dropping Cards Stack',
+    slug: 'dropping-cards-stack',
+    description: 'Cards that drop and stack with a gravity-like animation.',
+    category: 'cat-gimmicks',
+    tags: ['Cards', 'Stack', 'Drop', 'Animation', 'GSAP'],
+    thumbnailFileId: '',
+    isFree: true,
+    isNew: false,
+    externalScripts: ['https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js'],
+    sortOrder: 10
+  }
+]
+
+// Mock resource code – separated from resources due to Appwrite 65KB collection size limit
+export const mockResourceCodes: ResourceCode[] = [
+  {
+    $id: 'code-1',
+    $createdAt: '2025-12-16T10:00:00.000Z',
+    $updatedAt: '2025-12-16T10:00:00.000Z',
+    resourceId: 'res-1',
     htmlCode: `<a data-elastic-pulse-btn="" href="#" class="elastic-pulse-btn">
   <div data-elastic-pulse-target="" class="elastic-pulse-btn__content">
     <div class="elastic-pulse-btn__icon">
@@ -180,24 +330,13 @@ The pulse deformation is calculated dynamically from the element's font-size, gi
 
 ## Lock
 
-A hover lock prevents spam triggering by holding the effect for 500ms after it starts.`,
-    externalScripts: ['https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js'],
-    originalSourceUrl: 'https://osmo.supply',
-    authorName: 'Dennis Snellenberg',
-    sortOrder: 1
+A hover lock prevents spam triggering by holding the effect for 500ms after it starts.`
   },
   {
-    $id: 'res-2',
+    $id: 'code-2',
     $createdAt: '2025-12-15T10:00:00.000Z',
     $updatedAt: '2025-12-15T10:00:00.000Z',
-    title: 'Button with Slanted Reveal',
-    slug: 'button-slanted-reveal',
-    description: 'A button with a slanted background reveal effect on hover.',
-    category: 'cat-buttons',
-    tags: ['Button', 'Hover', 'Reveal', 'CSS', 'Transform'],
-    thumbnailFileId: '',
-    isFree: true,
-    isNew: true,
+    resourceId: 'res-2',
     htmlCode: '<button class="slanted-btn"><span>Slanted Button</span></button>',
     cssCode: `.slanted-btn {
   position: relative;
@@ -221,21 +360,13 @@ A hover lock prevents spam triggering by holding the effect for 500ms after it s
 .slanted-btn:hover::before { left: 0; }
 .slanted-btn span { position: relative; z-index: 1; }
 .slanted-btn:hover { color: #fff; }`,
-    jsCode: '',
-    sortOrder: 2
+    jsCode: ''
   },
   {
-    $id: 'res-3',
+    $id: 'code-3',
     $createdAt: '2025-12-14T10:00:00.000Z',
     $updatedAt: '2025-12-14T10:00:00.000Z',
-    title: 'Tilting Bouncing Button',
-    slug: 'tilting-bouncing-button',
-    description: 'A button that tilts and bounces on hover using GSAP.',
-    category: 'cat-buttons',
-    tags: ['Button', 'Tilt', 'Bounce', 'GSAP', 'Hover'],
-    thumbnailFileId: '',
-    isFree: false,
-    isNew: false,
+    resourceId: 'res-3',
     htmlCode: '<button class="tilt-btn">Bouncy Button</button>',
     cssCode: `.tilt-btn {
   padding: 0.75em 2em;
@@ -253,22 +384,13 @@ A hover lock prevents spam triggering by holding the effect for 500ms after it s
   btn.addEventListener('mouseleave', () => {
     gsap.to(btn, { rotate: 0, scale: 1, duration: 0.5, ease: 'elastic.out(1,0.3)' });
   });
-});`,
-    externalScripts: ['https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js'],
-    sortOrder: 3
+});`
   },
   {
-    $id: 'res-4',
+    $id: 'code-4',
     $createdAt: '2025-12-13T10:00:00.000Z',
     $updatedAt: '2025-12-13T10:00:00.000Z',
-    title: 'Side by Side Page Transition',
-    slug: 'side-by-side-page-transition',
-    description: 'A smooth side-by-side page transition effect for multi-page websites.',
-    category: 'cat-utilities',
-    tags: ['Transition', 'Page', 'Animation', 'GSAP'],
-    thumbnailFileId: '',
-    isFree: true,
-    isNew: true,
+    resourceId: 'res-4',
     htmlCode: '<div class="page-transition" data-transition></div>',
     cssCode: `.page-transition {
   position: fixed;
@@ -282,22 +404,13 @@ A hover lock prevents spam triggering by holding the effect for 500ms after it s
   tl.to('[data-transition]', { translateX: '0%', duration: 0.5, ease: 'power2.inOut' })
     .to('[data-transition]', { translateX: '100%', duration: 0.5, ease: 'power2.inOut' }, '+=0.1');
   return tl;
-}`,
-    externalScripts: ['https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js'],
-    sortOrder: 4
+}`
   },
   {
-    $id: 'res-5',
+    $id: 'code-5',
     $createdAt: '2025-12-12T10:00:00.000Z',
     $updatedAt: '2025-12-12T10:00:00.000Z',
-    title: 'Page Name Transition (Wipe)',
-    slug: 'page-name-transition-wipe',
-    description: 'A wipe transition that reveals the page name during navigation.',
-    category: 'cat-utilities',
-    tags: ['Transition', 'Wipe', 'Page Name', 'GSAP'],
-    thumbnailFileId: '',
-    isFree: true,
-    isNew: true,
+    resourceId: 'res-5',
     htmlCode: '<div class="wipe-transition"><span class="wipe-text">[ PAGE NAME ]</span></div>',
     cssCode: `.wipe-transition {
   position: fixed;
@@ -321,22 +434,13 @@ A hover lock prevents spam triggering by holding the effect for 500ms after it s
   return gsap.timeline()
     .to(el, { clipPath: 'inset(0 0% 0 0)', duration: 0.6, ease: 'power3.inOut' })
     .to(el, { clipPath: 'inset(0 0 0 100%)', duration: 0.6, ease: 'power3.inOut' }, '+=0.3');
-}`,
-    externalScripts: ['https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js'],
-    sortOrder: 5
+}`
   },
   {
-    $id: 'res-6',
+    $id: 'code-6',
     $createdAt: '2025-12-11T10:00:00.000Z',
     $updatedAt: '2025-12-11T10:00:00.000Z',
-    title: 'Magnetic Hover Effect',
-    slug: 'magnetic-hover-effect',
-    description: 'Elements that magnetically follow the cursor on hover.',
-    category: 'cat-cursor',
-    tags: ['Cursor', 'Magnetic', 'Hover', 'GSAP', 'Interactive'],
-    thumbnailFileId: '',
-    isFree: false,
-    isNew: false,
+    resourceId: 'res-6',
     htmlCode: '<button class="magnetic-btn" data-magnetic>Magnetic Effect</button>',
     cssCode: `.magnetic-btn {
   padding: 1em 2em;
@@ -357,22 +461,13 @@ A hover lock prevents spam triggering by holding the effect for 500ms after it s
   el.addEventListener('mouseleave', () => {
     gsap.to(el, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.3)' });
   });
-});`,
-    externalScripts: ['https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js'],
-    sortOrder: 6
+});`
   },
   {
-    $id: 'res-7',
+    $id: 'code-7',
     $createdAt: '2025-12-10T10:00:00.000Z',
     $updatedAt: '2025-12-10T10:00:00.000Z',
-    title: 'Line Reveal Testimonials',
-    slug: 'line-reveal-testimonials',
-    description: 'Testimonial cards with a line-by-line reveal animation on scroll.',
-    category: 'cat-scroll',
-    tags: ['Scroll', 'Reveal', 'Testimonials', 'GSAP', 'ScrollTrigger'],
-    thumbnailFileId: '',
-    isFree: true,
-    isNew: false,
+    resourceId: 'res-7',
     htmlCode: `<div class="testimonial" data-reveal>
   <p class="testimonial__text">"After a rough quarter, we needed hands fast. Their team jumped in with clear pricing and flexible coverage for weekend rushes and under delays."</p>
   <div class="testimonial__author">
@@ -408,25 +503,13 @@ document.querySelectorAll('[data-reveal]').forEach(el => {
     y: 40, opacity: 0, duration: 0.8,
     scrollTrigger: { trigger: el, start: 'top 85%' }
   });
-});`,
-    externalScripts: [
-      'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js',
-      'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js'
-    ],
-    sortOrder: 7
+});`
   },
   {
-    $id: 'res-8',
+    $id: 'code-8',
     $createdAt: '2025-12-09T10:00:00.000Z',
     $updatedAt: '2025-12-09T10:00:00.000Z',
-    title: 'Mini Showreel Player',
-    slug: 'mini-showreel-player',
-    description: 'A compact video player component with custom play/pause controls.',
-    category: 'cat-video',
-    tags: ['Video', 'Player', 'Showreel', 'Custom Controls'],
-    thumbnailFileId: '',
-    isFree: true,
-    isNew: false,
+    resourceId: 'res-8',
     htmlCode: `<div class="showreel">
   <video class="showreel__video" src="/showreel.mp4" muted loop></video>
   <button class="showreel__play" data-showreel-play>Play Showreel</button>
@@ -460,21 +543,13 @@ document.querySelectorAll('[data-reveal]').forEach(el => {
     if (video.paused) { video.play(); btn.textContent = 'Pause'; }
     else { video.pause(); btn.textContent = 'Play Showreel'; }
   });
-});`,
-    sortOrder: 8
+});`
   },
   {
-    $id: 'res-9',
+    $id: 'code-9',
     $createdAt: '2025-12-08T10:00:00.000Z',
     $updatedAt: '2025-12-08T10:00:00.000Z',
-    title: 'Two-step Scaling Navigation',
-    slug: 'two-step-scaling-navigation',
-    description: 'A full-screen navigation menu with a two-step scaling animation.',
-    category: 'cat-navigation',
-    tags: ['Navigation', 'Menu', 'Scale', 'GSAP', 'Fullscreen'],
-    thumbnailFileId: '',
-    isFree: false,
-    isNew: false,
+    resourceId: 'res-9',
     htmlCode: `<nav class="scaling-nav" data-scaling-nav>
   <ul>
     <li><a href="#">Home</a></li>
@@ -509,22 +584,13 @@ trigger.addEventListener('click', () => {
     duration: 0.6,
     ease: 'power3.inOut'
   });
-});`,
-    externalScripts: ['https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js'],
-    sortOrder: 9
+});`
   },
   {
-    $id: 'res-10',
+    $id: 'code-10',
     $createdAt: '2025-12-07T10:00:00.000Z',
     $updatedAt: '2025-12-07T10:00:00.000Z',
-    title: 'Dropping Cards Stack',
-    slug: 'dropping-cards-stack',
-    description: 'Cards that drop and stack with a gravity-like animation.',
-    category: 'cat-gimmicks',
-    tags: ['Cards', 'Stack', 'Drop', 'Animation', 'GSAP'],
-    thumbnailFileId: '',
-    isFree: true,
-    isNew: false,
+    resourceId: 'res-10',
     htmlCode: `<div class="card-stack">
   <div class="stack-card" data-stack-card>Branding & Identity.</div>
   <div class="stack-card" data-stack-card>Marketing.</div>
@@ -552,9 +618,7 @@ trigger.addEventListener('click', () => {
     opacity: 0, duration: 0.6, delay: i * 0.15,
     ease: 'bounce.out'
   });
-});`,
-    externalScripts: ['https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js'],
-    sortOrder: 10
+});`
   }
 ]
 

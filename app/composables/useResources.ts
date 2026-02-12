@@ -1,5 +1,5 @@
-import { mockResources } from '~/utils/mock-data'
-import type { Resource } from '~/types'
+import { mockResources, mockResourceCodes } from '~/utils/mock-data'
+import type { Resource, ResourceCode } from '~/types'
 import { APPWRITE } from '~/utils/constants'
 
 // Auto-detect mock mode
@@ -52,6 +52,30 @@ export function useResources() {
   }
 
   /**
+   * Get the code for a resource (from separate resource-code collection)
+   */
+  async function getResourceCode(resourceId: string): Promise<ResourceCode | null> {
+    try {
+      if (MOCK_MODE) {
+        await new Promise(resolve => setTimeout(resolve, 100))
+        return mockResourceCodes.find(c => c.resourceId === resourceId) ?? null
+      } else {
+        const { database, Query } = useAppwrite()
+        const result = await database.listDocuments(
+          APPWRITE.DATABASE_ID,
+          APPWRITE.COLLECTIONS.RESOURCE_CODE,
+          [Query.equal('resourceId', resourceId), Query.limit(1)]
+        )
+        if (result.documents.length === 0) return null
+        return result.documents[0] as unknown as ResourceCode
+      }
+    } catch (error) {
+      console.error('Failed to load resource code:', error)
+      return null
+    }
+  }
+
+  /**
    * Get related resources (same category, excluding current)
    */
   function getRelatedResources(resource: Resource, limit = 4): Resource[] {
@@ -77,6 +101,7 @@ export function useResources() {
   return {
     loadResources,
     getResourceBySlug,
+    getResourceCode,
     getRelatedResources,
     getFilePreviewUrl,
     resources: computed(() => vaultStore.resources),

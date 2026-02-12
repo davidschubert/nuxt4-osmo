@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import type { Resource } from '~/types'
+import type { ResourceCode } from '~/types'
 
 const props = defineProps<{
-  resource: Resource
+  code: ResourceCode
+  externalScripts?: string[]
 }>()
 
 const closingScript = '<' + '/script>'
 
 // Generate preview HTML combining all code
 const previewHtml = computed(() => {
-  const scripts = (props.resource.externalScripts || [])
+  const scripts = (props.externalScripts || [])
     .map(src => `<script src="${src}">${closingScript}`)
     .join('\n')
 
@@ -28,13 +29,13 @@ const previewHtml = computed(() => {
       background: #f5f0eb;
       font-family: system-ui, -apple-system, sans-serif;
     }
-    ${props.resource.cssCode}
+    ${props.code.cssCode}
   </style>
 </head>
 <body>
-  ${props.resource.htmlCode}
+  ${props.code.htmlCode}
   ${scripts}
-  <script>${props.resource.jsCode}${closingScript}
+  <script>${props.code.jsCode}${closingScript}
 </body>
 </html>`
 })
