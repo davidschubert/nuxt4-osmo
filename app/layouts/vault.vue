@@ -12,7 +12,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UDashboardGroup>
+  <UDashboardGroup unit="px">
     <VaultSidebar />
 
     <AppSearch />
