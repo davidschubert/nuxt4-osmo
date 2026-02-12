@@ -1,9 +1,11 @@
 import { mockUser } from '~/utils/mock-data'
 import type { UserProfile } from '~/types'
+import { APPWRITE } from '~/utils/constants'
 
-// Mock auth mode: simulates Appwrite auth with local state
-// Will be replaced with real Appwrite calls in Phase 7
-const MOCK_MODE = true
+// Auto-detect mock mode: active when no Appwrite project is configured
+const MOCK_MODE = !import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT
+  || import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT === ''
+  || import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT === 'placeholder'
 
 interface LoginParams {
   email: string
@@ -14,6 +16,26 @@ interface RegisterParams {
   name: string
   email: string
   password: string
+}
+
+/**
+ * Map Appwrite user + optional profile document to our UserProfile interface
+ */
+function mapAppwriteUser(
+  user: Record<string, unknown>,
+  profile?: Record<string, unknown> | null
+): UserProfile {
+  return {
+    $id: (profile?.$id as string) || (user.$id as string),
+    userId: user.$id as string,
+    displayName: (user.name as string) || (user.email as string)?.split('@')[0] || 'User',
+    email: user.email as string,
+    avatarUrl: (profile?.avatarUrl as string) || undefined,
+    subscriptionStatus: (profile?.subscriptionStatus as UserProfile['subscriptionStatus']) || 'free',
+    stripeCustomerId: (profile?.stripeCustomerId as string) || undefined,
+    stripeSubscriptionId: (profile?.stripeSubscriptionId as string) || undefined,
+    subscribedAt: (profile?.subscribedAt as string) || undefined
+  }
 }
 
 export function useAuth() {
@@ -29,7 +51,6 @@ export function useAuth() {
     authStore.setLoading(true)
     try {
       if (MOCK_MODE) {
-        // In mock mode, check localStorage for mock session
         if (import.meta.client) {
           const savedSession = localStorage.getItem('vault-mock-session')
           if (savedSession) {
@@ -37,10 +58,20 @@ export function useAuth() {
           }
         }
       } else {
-        // Real Appwrite: check active session
-        // const { account } = useAppwrite()
-        // const user = await account.get()
-        // authStore.setUser(mapAppwriteUser(user))
+        const { account, database } = useAppwrite()
+        const user = await account.get()
+        // Try to fetch user profile from database
+        let profile: Record<string, unknown> | null = null
+        try {
+          profile = await database.getDocument(
+            APPWRITE.DATABASE_ID,
+            APPWRITE.COLLECTIONS.USER_PROFILES,
+            user.$id
+          )
+        } catch {
+          // Profile may not exist yet for new users
+        }
+        authStore.setUser(mapAppwriteUser(user as unknown as Record<string, unknown>, profile))
       }
     } catch {
       authStore.setUser(null)
@@ -57,30 +88,34 @@ export function useAuth() {
     authStore.setLoading(true)
     try {
       if (MOCK_MODE) {
-        // Simulate login delay
         await new Promise(resolve => setTimeout(resolve, 500))
-
-        // Accept any email/password combo in mock mode
         if (!email || !password) {
           throw new Error('Email and password are required')
         }
-
         const user: UserProfile = {
           ...mockUser,
           email,
           displayName: email.split('@')[0] || mockUser.displayName
         }
-
         authStore.setUser(user)
         if (import.meta.client) {
           localStorage.setItem('vault-mock-session', JSON.stringify(user))
         }
       } else {
-        // Real Appwrite
-        // const { account } = useAppwrite()
-        // await account.createEmailPasswordSession({ email, password })
-        // const user = await account.get()
-        // authStore.setUser(mapAppwriteUser(user))
+        const { account, database } = useAppwrite()
+        await account.createEmailPasswordSession(email, password)
+        const user = await account.get()
+        let profile: Record<string, unknown> | null = null
+        try {
+          profile = await database.getDocument(
+            APPWRITE.DATABASE_ID,
+            APPWRITE.COLLECTIONS.USER_PROFILES,
+            user.$id
+          )
+        } catch {
+          // Profile may not exist yet
+        }
+        authStore.setUser(mapAppwriteUser(user as unknown as Record<string, unknown>, profile))
       }
 
       toast.add({ title: 'Welcome back!', description: 'You have been logged in successfully.' })
@@ -101,30 +136,46 @@ export function useAuth() {
     authStore.setLoading(true)
     try {
       if (MOCK_MODE) {
-        // Simulate registration delay
         await new Promise(resolve => setTimeout(resolve, 500))
-
         if (!name || !email || !password) {
           throw new Error('All fields are required')
         }
-
         const user: UserProfile = {
           ...mockUser,
           displayName: name,
           email
         }
-
         authStore.setUser(user)
         if (import.meta.client) {
           localStorage.setItem('vault-mock-session', JSON.stringify(user))
         }
       } else {
-        // Real Appwrite
-        // const { account, ID } = useAppwrite()
-        // await account.create({ userId: ID.unique(), email, password, name })
-        // await account.createEmailPasswordSession({ email, password })
-        // const user = await account.get()
-        // authStore.setUser(mapAppwriteUser(user))
+        const { account, database, ID, Permission, Role } = useAppwrite()
+        // Create Appwrite account
+        await account.create(ID.unique(), email, password, name)
+        // Auto-login after registration
+        await account.createEmailPasswordSession(email, password)
+        const user = await account.get()
+        // Create user profile document (for subscription tracking)
+        try {
+          await database.createDocument(
+            APPWRITE.DATABASE_ID,
+            APPWRITE.COLLECTIONS.USER_PROFILES,
+            user.$id,
+            {
+              userId: user.$id,
+              displayName: name,
+              subscriptionStatus: 'free'
+            },
+            [
+              Permission.read(Role.user(user.$id)),
+              Permission.update(Role.user(user.$id))
+            ]
+          )
+        } catch {
+          // Profile creation may fail if collection isn't set up yet
+        }
+        authStore.setUser(mapAppwriteUser(user as unknown as Record<string, unknown>))
       }
 
       toast.add({ title: 'Welcome!', description: 'Your account has been created.' })
@@ -150,9 +201,8 @@ export function useAuth() {
           localStorage.removeItem('vault-mock-session')
         }
       } else {
-        // Real Appwrite
-        // const { account } = useAppwrite()
-        // await account.deleteSession({ sessionId: 'current' })
+        const { account } = useAppwrite()
+        await account.deleteSession('current')
       }
 
       authStore.clear()
@@ -167,32 +217,33 @@ export function useAuth() {
   }
 
   /**
-   * Login with OAuth provider (mock: direct login)
+   * Login with OAuth provider
+   * Note: OAuth redirects the browser, so this function does not return in real mode
    */
   async function loginWithOAuth(provider: 'github' | 'google' | 'apple') {
     authStore.setLoading(true)
     try {
       if (MOCK_MODE) {
         await new Promise(resolve => setTimeout(resolve, 500))
-
         const user: UserProfile = {
           ...mockUser,
           displayName: `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`
         }
-
         authStore.setUser(user)
         if (import.meta.client) {
           localStorage.setItem('vault-mock-session', JSON.stringify(user))
         }
+        toast.add({ title: 'Welcome!', description: `Logged in with ${provider}.` })
+        await navigateTo('/vault')
       } else {
-        // Real Appwrite
-        // const { account, OAuthProvider } = useAppwrite()
-        // const providerMap = { github: OAuthProvider.Github, google: OAuthProvider.Google, apple: OAuthProvider.Apple }
-        // account.createOAuth2Session({ provider: providerMap[provider], success: `${window.location.origin}/vault`, failure: `${window.location.origin}/login` })
+        const { account } = useAppwrite()
+        // OAuth redirects the browser – this call does not return
+        account.createOAuth2Session(
+          provider as never,
+          `${window.location.origin}/vault`,
+          `${window.location.origin}/login`
+        )
       }
-
-      toast.add({ title: 'Welcome!', description: `Logged in with ${provider}.` })
-      await navigateTo('/vault')
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'OAuth login failed.'
       toast.add({ title: 'Login failed', description: message, color: 'error' })

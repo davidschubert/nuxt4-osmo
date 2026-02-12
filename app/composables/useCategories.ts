@@ -1,13 +1,17 @@
 import { mockCategories } from '~/utils/mock-data'
+import type { Category } from '~/types'
+import { APPWRITE } from '~/utils/constants'
 
-// Mock mode: will be replaced with Appwrite calls in Phase 7
-const MOCK_MODE = true
+// Auto-detect mock mode
+const MOCK_MODE = !import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT
+  || import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT === ''
+  || import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT === 'placeholder'
 
 export function useCategories() {
   const vaultStore = useVaultStore()
 
   /**
-   * Load all categories
+   * Load all categories from Appwrite or mock data
    */
   async function loadCategories() {
     if (vaultStore.categories.length > 0) return
@@ -16,16 +20,15 @@ export function useCategories() {
     try {
       if (MOCK_MODE) {
         await new Promise(resolve => setTimeout(resolve, 200))
-        vaultStore.setCategories(mockCategories as unknown as typeof vaultStore.categories)
+        vaultStore.setCategories(mockCategories as unknown as Category[])
       } else {
-        // Real Appwrite
-        // const { database, Query } = useAppwrite()
-        // const result = await database.listDocuments({
-        //   databaseId: APPWRITE.DATABASE_ID,
-        //   collectionId: APPWRITE.COLLECTIONS.CATEGORIES,
-        //   queries: [Query.orderAsc('sortOrder'), Query.limit(100)]
-        // })
-        // vaultStore.setCategories(result.documents)
+        const { database, Query } = useAppwrite()
+        const result = await database.listDocuments(
+          APPWRITE.DATABASE_ID,
+          APPWRITE.COLLECTIONS.CATEGORIES,
+          [Query.orderAsc('sortOrder'), Query.limit(100)]
+        )
+        vaultStore.setCategories(result.documents as unknown as Category[])
       }
     } catch (error) {
       console.error('Failed to load categories:', error)
