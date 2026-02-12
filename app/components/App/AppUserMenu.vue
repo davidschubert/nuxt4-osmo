@@ -24,6 +24,13 @@ const subscriptionLabel = computed(() => {
 })
 
 const menuItems = computed(() => [
+  ...(authStore.isAdmin
+    ? [[{
+        label: 'Admin Panel',
+        icon: 'i-lucide-shield',
+        to: '/admin'
+      }]]
+    : []),
   [{
     label: 'Account',
     icon: 'i-lucide-user',

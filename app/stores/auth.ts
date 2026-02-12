@@ -3,6 +3,7 @@ import type { UserProfile, SubscriptionStatus } from '~/types'
 
 interface AuthState {
   user: UserProfile | null
+  accountLabels: string[]
   loading: boolean
   initialized: boolean
 }
@@ -10,12 +11,14 @@ interface AuthState {
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     user: null,
+    accountLabels: [],
     loading: false,
     initialized: false
   }),
 
   getters: {
     isAuthenticated: (state): boolean => !!state.user,
+    isAdmin: (state): boolean => state.accountLabels.includes('admin'),
     isSubscribed: (state): boolean => state.user?.subscriptionStatus === 'active',
     subscriptionStatus: (state): SubscriptionStatus => state.user?.subscriptionStatus ?? 'free',
     displayName: (state): string => state.user?.displayName ?? '',
@@ -35,6 +38,10 @@ export const useAuthStore = defineStore('auth', {
       this.user = user
     },
 
+    setAccountLabels(labels: string[]) {
+      this.accountLabels = labels
+    },
+
     setLoading(loading: boolean) {
       this.loading = loading
     },
@@ -45,6 +52,7 @@ export const useAuthStore = defineStore('auth', {
 
     clear() {
       this.user = null
+      this.accountLabels = []
       this.loading = false
     }
   }
