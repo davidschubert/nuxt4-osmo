@@ -10,6 +10,8 @@ export default defineNuxtConfig({
     'nuxt-appwrite'
   ],
 
+  ssr: false,
+
   devtools: {
     enabled: true
   },
@@ -30,10 +32,6 @@ export default defineNuxtConfig({
       stripePriceId: '',
       appUrl: 'http://localhost:3000'
     }
-  },
-
-  routeRules: {
-    '/': { prerender: true }
   },
 
   compatibilityDate: '2025-01-15',

@@ -1,14 +1,17 @@
 import { mockResources } from '~/utils/mock-data'
 import type { Resource } from '~/types'
+import { APPWRITE } from '~/utils/constants'
 
-// Mock mode: will be replaced with Appwrite calls in Phase 7
-const MOCK_MODE = true
+// Auto-detect mock mode
+const MOCK_MODE = !import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT
+  || import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT === ''
+  || import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT === 'placeholder'
 
 export function useResources() {
   const vaultStore = useVaultStore()
 
   /**
-   * Load all resources
+   * Load all resources from Appwrite or mock data
    */
   async function loadResources() {
     if (vaultStore.resources.length > 0) return
@@ -19,14 +22,20 @@ export function useResources() {
         await new Promise(resolve => setTimeout(resolve, 300))
         vaultStore.setResources(mockResources)
       } else {
-        // Real Appwrite
-        // const { database, Query } = useAppwrite()
-        // const result = await database.listDocuments({
-        //   databaseId: APPWRITE.DATABASE_ID,
-        //   collectionId: APPWRITE.COLLECTIONS.RESOURCES,
-        //   queries: [Query.orderAsc('sortOrder'), Query.limit(100)]
-        // })
-        // vaultStore.setResources(result.documents)
+        const { database, Query } = useAppwrite()
+        const result = await database.listDocuments(
+          APPWRITE.DATABASE_ID,
+          APPWRITE.COLLECTIONS.RESOURCES,
+          [Query.orderAsc('sortOrder'), Query.limit(100)]
+        )
+        // Map documents and resolve thumbnail URLs
+        const resources = (result.documents as unknown as Resource[]).map(doc => ({
+          ...doc,
+          thumbnailUrl: doc.thumbnailFileId
+            ? getFilePreviewUrl(doc.thumbnailFileId)
+            : undefined
+        }))
+        vaultStore.setResources(resources)
       }
     } catch (error) {
       console.error('Failed to load resources:', error)
@@ -51,10 +60,25 @@ export function useResources() {
       .slice(0, limit)
   }
 
+  /**
+   * Generate Appwrite storage preview URL for a thumbnail
+   */
+  function getFilePreviewUrl(fileId: string, width = 400, height = 300): string {
+    if (MOCK_MODE || !fileId) return ''
+    const { storage } = useAppwrite()
+    return storage.getFilePreview(
+      APPWRITE.BUCKETS.THUMBNAILS,
+      fileId,
+      width,
+      height
+    )
+  }
+
   return {
     loadResources,
     getResourceBySlug,
     getRelatedResources,
+    getFilePreviewUrl,
     resources: computed(() => vaultStore.resources),
     filteredResources: computed(() => vaultStore.filteredResources),
     totalResourceCount: computed(() => vaultStore.totalResourceCount),
