@@ -22,12 +22,12 @@ export function useCategories() {
         await new Promise(resolve => setTimeout(resolve, 200))
         vaultStore.setCategories(mockCategories as unknown as Category[])
       } else {
-        const { database, Query } = useAppwrite()
-        const result = await database.listDocuments(
-          APPWRITE.DATABASE_ID,
-          APPWRITE.COLLECTIONS.CATEGORIES,
-          [Query.orderAsc('sortOrder'), Query.limit(100)]
-        )
+        const { databases, Query } = useAppwrite()
+        const result = await databases.listDocuments({
+          databaseId: APPWRITE.DATABASE_ID,
+          collectionId: APPWRITE.COLLECTIONS.CATEGORIES,
+          queries: [Query.orderAsc('sortOrder'), Query.limit(100)]
+        })
         vaultStore.setCategories(result.documents as unknown as Category[])
       }
     } catch (error) {

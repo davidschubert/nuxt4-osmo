@@ -6,8 +6,7 @@ export default defineNuxtConfig({
     '@nuxt/content',
     '@nuxt/image',
     '@nuxt/scripts',
-    '@pinia/nuxt',
-    'nuxt-appwrite'
+    '@pinia/nuxt'
   ],
 
   ssr: false,
@@ -29,18 +28,14 @@ export default defineNuxtConfig({
     appwriteApiKey: '',
     // Public keys (exposed to client)
     public: {
+      appwriteEndpoint: 'https://cloud.appwrite.io/v1',
+      appwriteProject: '',
       stripePriceId: '',
       appUrl: 'http://localhost:3000'
     }
   },
 
   compatibilityDate: '2025-01-15',
-
-  // Appwrite configuration
-  appwrite: {
-    endpoint: process.env.NUXT_PUBLIC_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1',
-    project: process.env.NUXT_PUBLIC_APPWRITE_PROJECT || ''
-  },
 
   eslint: {
     config: {

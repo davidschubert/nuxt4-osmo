@@ -78,7 +78,7 @@ Reference screenshots from the original OSMO Supply app are stored in `docs/refe
 | UI Library | @nuxt/ui | 4.4.0 |
 | CSS | Tailwind CSS | 4.1.18 |
 | State | Pinia (@pinia/nuxt) | 0.11.3 |
-| Backend | Appwrite (nuxt-appwrite) | 1.2.0 |
+| Backend | Appwrite (appwrite SDK) | 22.0.0 |
 | Payments | Stripe | TBD |
 | Content | @nuxt/content | 3.11.2 |
 | Images | @nuxt/image | 2.0.0 |
@@ -222,13 +222,17 @@ Uses `UDashboardGroup` > `UDashboardSidebar` (collapsible, resizable) + `UDashbo
 
 ## Appwrite Integration
 
+Uses the official `appwrite` Web SDK (npm: `appwrite`) directly, **not** the unofficial `nuxt-appwrite` module. A custom composable `app/composables/useAppwrite.ts` initializes the SDK as singletons.
+
 ### Configuration
 
-In `nuxt.config.ts`:
+In `nuxt.config.ts` via `runtimeConfig.public`:
 ```ts
-appwrite: {
-  endpoint: process.env.NUXT_PUBLIC_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1',
-  project: process.env.NUXT_PUBLIC_APPWRITE_PROJECT || ''
+runtimeConfig: {
+  public: {
+    appwriteEndpoint: 'https://cloud.appwrite.io/v1',
+    appwriteProject: ''
+  }
 }
 ```
 
@@ -241,10 +245,12 @@ NUXT_PUBLIC_APPWRITE_PROJECT=<project-id>
 ### useAppwrite() API
 
 ```ts
-const { account, database, storage, Query, ID, Permission, Role } = useAppwrite()
+const { client, account, databases, storage, Query, ID, Permission, Role, OAuthProvider } = useAppwrite()
 ```
 
-**IMPORTANT**: The property is `database` (singular), NOT `databases`. This is how nuxt-appwrite 1.2.0 names it.
+The composable is auto-imported by Nuxt. It returns singleton instances of `Client`, `Account`, `Databases`, `Storage` plus re-exports of `Query`, `ID`, `Permission`, `Role`, `OAuthProvider`.
+
+**IMPORTANT**: The property is `databases` (plural), matching the official Appwrite SDK. All methods use **object syntax** (named parameters).
 
 ### Auth Pattern
 
@@ -259,6 +265,13 @@ await account.create({ userId: ID.unique(), email, password, name })
 // Logout
 await account.deleteSession({ sessionId: 'current' })
 
+// OAuth
+account.createOAuth2Session({
+  provider: OAuthProvider.Github,
+  success: `${window.location.origin}/vault`,
+  failure: `${window.location.origin}/login`
+})
+
 // Check session
 try { user.value = await account.get() } catch { user.value = null }
 ```
@@ -267,7 +280,7 @@ try { user.value = await account.get() } catch { user.value = null }
 
 ```ts
 // List with filters
-const result = await database.listDocuments({
+const result = await databases.listDocuments({
   databaseId: DB_ID,
   collectionId: COLLECTION_ID,
   queries: [
@@ -278,10 +291,19 @@ const result = await database.listDocuments({
 })
 
 // Get single document
-const doc = await database.getDocument({
+const doc = await databases.getDocument({
   databaseId: DB_ID,
   collectionId: COLLECTION_ID,
   documentId: slug
+})
+
+// Create document
+await databases.createDocument({
+  databaseId: DB_ID,
+  collectionId: COLLECTION_ID,
+  documentId: ID.unique(),
+  data: { ... },
+  permissions: [Permission.read(Role.any())]
 })
 ```
 
@@ -298,7 +320,7 @@ const previewUrl = storage.getFilePreview({
 
 ### Server-Side Note
 
-`nuxt-appwrite` is client-only. For server API routes (Stripe webhooks, admin operations), use the `node-appwrite` SDK with an API key via `useRuntimeConfig()`.
+The `appwrite` Web SDK is client-only. For server API routes (Stripe webhooks, admin operations), use the `node-appwrite` SDK with an API key via `useRuntimeConfig()`.
 
 ## Data Model
 
@@ -399,12 +421,12 @@ interface UserProfile {
 ## Architectural Decisions
 
 1. **Dark-first**: `useColorMode` defaults to dark. All UI built dark-first.
-2. **Client-side Appwrite**: `nuxt-appwrite` is client-only. Server routes use `node-appwrite` with API key.
+2. **Client-side Appwrite**: Uses the official `appwrite` Web SDK (client-only). Server routes use `node-appwrite` with API key.
 3. **Dashboard layout for vault**: `UDashboardGroup` + `UDashboardSidebar` + `UDashboardPanel` for the authenticated vault experience. Public pages use a simpler `default` layout.
 4. **Pinia for global state**: Auth and vault filter state in Pinia stores. Composables wrap Appwrite calls and update stores.
 5. **Slug-based routing**: Resources accessed by slug, not Appwrite document ID. Slug must be unique and indexed.
 6. **Route rules**: Landing page prerendered. Vault pages are SSR/SPA.
 7. **Freemium gating**: Display gating is client-side. Data security via Appwrite document-level permissions so premium content is never sent to unauthorized clients.
 8. **Category counts**: Computed client-side from resources list or cached via Appwrite function. Not a static stored field.
-9. **No SSR auth**: Auth is client-side only via nuxt-appwrite. Middleware auth checks run client-side.
+9. **No SSR auth**: Auth is client-side only via the `appwrite` Web SDK. Middleware auth checks run client-side.
 10. **Stripe webhooks = source of truth**: Client never directly modifies subscription state.

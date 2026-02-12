@@ -58,16 +58,16 @@ export function useAuth() {
           }
         }
       } else {
-        const { account, database } = useAppwrite()
+        const { account, databases } = useAppwrite()
         const user = await account.get()
         // Try to fetch user profile from database
         let profile: Record<string, unknown> | null = null
         try {
-          profile = await database.getDocument(
-            APPWRITE.DATABASE_ID,
-            APPWRITE.COLLECTIONS.USER_PROFILES,
-            user.$id
-          )
+          profile = await databases.getDocument({
+            databaseId: APPWRITE.DATABASE_ID,
+            collectionId: APPWRITE.COLLECTIONS.USER_PROFILES,
+            documentId: user.$id
+          })
         } catch {
           // Profile may not exist yet for new users
         }
@@ -102,16 +102,16 @@ export function useAuth() {
           localStorage.setItem('vault-mock-session', JSON.stringify(user))
         }
       } else {
-        const { account, database } = useAppwrite()
-        await account.createEmailPasswordSession(email, password)
+        const { account, databases } = useAppwrite()
+        await account.createEmailPasswordSession({ email, password })
         const user = await account.get()
         let profile: Record<string, unknown> | null = null
         try {
-          profile = await database.getDocument(
-            APPWRITE.DATABASE_ID,
-            APPWRITE.COLLECTIONS.USER_PROFILES,
-            user.$id
-          )
+          profile = await databases.getDocument({
+            databaseId: APPWRITE.DATABASE_ID,
+            collectionId: APPWRITE.COLLECTIONS.USER_PROFILES,
+            documentId: user.$id
+          })
         } catch {
           // Profile may not exist yet
         }
@@ -150,28 +150,28 @@ export function useAuth() {
           localStorage.setItem('vault-mock-session', JSON.stringify(user))
         }
       } else {
-        const { account, database, ID, Permission, Role } = useAppwrite()
+        const { account, databases, ID, Permission, Role } = useAppwrite()
         // Create Appwrite account
-        await account.create(ID.unique(), email, password, name)
+        await account.create({ userId: ID.unique(), email, password, name })
         // Auto-login after registration
-        await account.createEmailPasswordSession(email, password)
+        await account.createEmailPasswordSession({ email, password })
         const user = await account.get()
         // Create user profile document (for subscription tracking)
         try {
-          await database.createDocument(
-            APPWRITE.DATABASE_ID,
-            APPWRITE.COLLECTIONS.USER_PROFILES,
-            user.$id,
-            {
+          await databases.createDocument({
+            databaseId: APPWRITE.DATABASE_ID,
+            collectionId: APPWRITE.COLLECTIONS.USER_PROFILES,
+            documentId: user.$id,
+            data: {
               userId: user.$id,
               displayName: name,
               subscriptionStatus: 'free'
             },
-            [
+            permissions: [
               Permission.read(Role.user(user.$id)),
               Permission.update(Role.user(user.$id))
             ]
-          )
+          })
         } catch {
           // Profile creation may fail if collection isn't set up yet
         }
@@ -202,7 +202,7 @@ export function useAuth() {
         }
       } else {
         const { account } = useAppwrite()
-        await account.deleteSession('current')
+        await account.deleteSession({ sessionId: 'current' })
       }
 
       authStore.clear()
@@ -236,13 +236,18 @@ export function useAuth() {
         toast.add({ title: 'Welcome!', description: `Logged in with ${provider}.` })
         await navigateTo('/vault')
       } else {
-        const { account } = useAppwrite()
+        const { account, OAuthProvider } = useAppwrite()
+        const providerMap: Record<string, string> = {
+          github: OAuthProvider.Github,
+          google: OAuthProvider.Google,
+          apple: OAuthProvider.Apple
+        }
         // OAuth redirects the browser – this call does not return
-        account.createOAuth2Session(
-          provider as never,
-          `${window.location.origin}/vault`,
-          `${window.location.origin}/login`
-        )
+        account.createOAuth2Session({
+          provider: providerMap[provider] as string,
+          success: `${window.location.origin}/vault`,
+          failure: `${window.location.origin}/login`
+        })
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'OAuth login failed.'

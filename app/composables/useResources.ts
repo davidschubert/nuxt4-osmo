@@ -22,12 +22,12 @@ export function useResources() {
         await new Promise(resolve => setTimeout(resolve, 300))
         vaultStore.setResources(mockResources)
       } else {
-        const { database, Query } = useAppwrite()
-        const result = await database.listDocuments(
-          APPWRITE.DATABASE_ID,
-          APPWRITE.COLLECTIONS.RESOURCES,
-          [Query.orderAsc('sortOrder'), Query.limit(100)]
-        )
+        const { databases, Query } = useAppwrite()
+        const result = await databases.listDocuments({
+          databaseId: APPWRITE.DATABASE_ID,
+          collectionId: APPWRITE.COLLECTIONS.RESOURCES,
+          queries: [Query.orderAsc('sortOrder'), Query.limit(100)]
+        })
         // Map documents and resolve thumbnail URLs
         const resources = (result.documents as unknown as Resource[]).map(doc => ({
           ...doc,
@@ -60,12 +60,12 @@ export function useResources() {
         await new Promise(resolve => setTimeout(resolve, 100))
         return mockResourceCodes.find(c => c.resourceId === resourceId) ?? null
       } else {
-        const { database, Query } = useAppwrite()
-        const result = await database.listDocuments(
-          APPWRITE.DATABASE_ID,
-          APPWRITE.COLLECTIONS.RESOURCE_CODE,
-          [Query.equal('resourceId', resourceId), Query.limit(1)]
-        )
+        const { databases, Query } = useAppwrite()
+        const result = await databases.listDocuments({
+          databaseId: APPWRITE.DATABASE_ID,
+          collectionId: APPWRITE.COLLECTIONS.RESOURCE_CODE,
+          queries: [Query.equal('resourceId', resourceId), Query.limit(1)]
+        })
         if (result.documents.length === 0) return null
         return result.documents[0] as unknown as ResourceCode
       }
@@ -90,12 +90,12 @@ export function useResources() {
   function getFilePreviewUrl(fileId: string, width = 400, height = 300): string {
     if (MOCK_MODE || !fileId) return ''
     const { storage } = useAppwrite()
-    return storage.getFilePreview(
-      APPWRITE.BUCKETS.THUMBNAILS,
+    return storage.getFilePreview({
+      bucketId: APPWRITE.BUCKETS.THUMBNAILS,
       fileId,
       width,
       height
-    )
+    })
   }
 
   return {
