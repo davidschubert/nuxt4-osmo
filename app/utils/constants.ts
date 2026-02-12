@@ -1,9 +1,10 @@
 // Appwrite configuration constants
-// Replace placeholder values with real IDs after Appwrite project setup (Phase 7)
+// These IDs match the collections created via Appwrite CLI
 export const APPWRITE = {
   DATABASE_ID: 'vault-db',
   COLLECTIONS: {
     RESOURCES: 'resources',
+    RESOURCE_CODE: 'resource-code',
     CATEGORIES: 'categories',
     USER_PROFILES: 'user-profiles'
   },

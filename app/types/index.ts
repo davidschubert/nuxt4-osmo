@@ -1,7 +1,7 @@
 // Subscription status for user profiles
 export type SubscriptionStatus = 'free' | 'active' | 'canceled' | 'past_due'
 
-// Resource represents a single vault entry (code snippet, component, animation, etc.)
+// Resource represents a single vault entry (metadata only, code lives in ResourceCode)
 export interface Resource {
   $id: string
   $createdAt: string
@@ -15,16 +15,24 @@ export interface Resource {
   thumbnailUrl?: string // Resolved preview URL (client-side)
   isFree: boolean // true = free tier, false = premium
   isNew: boolean // "New" badge display
-  htmlCode: string
-  cssCode: string
-  jsCode: string
-  implementationNotes?: string // Markdown implementation docs
   externalScripts?: string[] // CDN URLs for external dependencies (e.g. gsap)
   previewUrl?: string // External preview URL
   originalSourceUrl?: string // Link to original source
   authorName?: string // Resource author
   authorAvatarUrl?: string // Author avatar
   sortOrder: number
+}
+
+// ResourceCode holds the code content for a resource (separate Appwrite collection due to 65KB limit)
+export interface ResourceCode {
+  $id: string
+  $createdAt: string
+  $updatedAt: string
+  resourceId: string // Reference to the parent Resource.$id
+  htmlCode: string
+  cssCode: string
+  jsCode: string
+  implementationNotes?: string // Markdown implementation docs
 }
 
 // Category for sidebar navigation

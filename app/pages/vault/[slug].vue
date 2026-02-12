@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import type { ResourceCode } from '~/types'
+
 definePageMeta({
   layout: 'vault',
   middleware: 'auth'
 })
 
 const route = useRoute()
-const { getResourceBySlug, getRelatedResources, loading } = useResources()
+const { getResourceBySlug, getRelatedResources, getResourceCode, loading } = useResources()
 const { isSubscribed } = useAuth()
 const { categoriesWithCount } = useCategories()
 
@@ -27,6 +29,20 @@ const isLocked = computed(() => {
   if (!resource.value) return false
   return !resource.value.isFree && !isSubscribed.value
 })
+
+// Load code separately from the resource-code collection
+const resourceCode = ref<ResourceCode | null>(null)
+const codeLoading = ref(false)
+
+watch(resource, async (res) => {
+  if (!res) {
+    resourceCode.value = null
+    return
+  }
+  codeLoading.value = true
+  resourceCode.value = await getResourceCode(res.$id)
+  codeLoading.value = false
+}, { immediate: true })
 
 // Breadcrumb
 const breadcrumbItems = computed(() => {
@@ -137,16 +153,28 @@ useSeoMeta({
             </div>
           </div>
 
+          <!-- Code loading state -->
+          <div
+            v-if="codeLoading"
+            class="space-y-4"
+          >
+            <USkeleton class="aspect-[16/9] w-full rounded-xl" />
+            <USkeleton class="h-6 w-48" />
+            <USkeleton class="h-40 w-full rounded-lg" />
+          </div>
+
           <!-- Premium lock or content -->
-          <template v-if="isLocked">
-            <!-- Show preview but lock code -->
-            <ResourcePreview :resource="resource" />
+          <template v-else-if="isLocked">
+            <!-- Show blurred lock overlay (no code shown) -->
             <ResourceLock :resource-title="resource.title" />
           </template>
 
-          <template v-else>
+          <template v-else-if="resourceCode">
             <!-- Preview -->
-            <ResourcePreview :resource="resource" />
+            <ResourcePreview
+              :code="resourceCode"
+              :external-scripts="resource.externalScripts"
+            />
 
             <!-- Documentation section -->
             <div class="space-y-4">
@@ -157,19 +185,22 @@ useSeoMeta({
               <USeparator />
 
               <!-- Code steps -->
-              <ResourceCode :resource="resource" />
+              <ResourceCode
+                :code="resourceCode"
+                :external-scripts="resource.externalScripts"
+              />
             </div>
 
             <!-- Implementation notes -->
             <div
-              v-if="resource.implementationNotes"
+              v-if="resourceCode.implementationNotes"
               class="space-y-4"
             >
               <h2 class="text-xl font-bold">
                 Implementation
               </h2>
               <div class="prose prose-sm prose-invert max-w-none">
-                <div v-html="renderMarkdown(resource.implementationNotes)" />
+                <div v-html="renderMarkdown(resourceCode.implementationNotes)" />
               </div>
             </div>
           </template>

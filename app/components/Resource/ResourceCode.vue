@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { Resource } from '~/types'
+import type { ResourceCode } from '~/types'
 
 const props = defineProps<{
-  resource: Resource
+  code: ResourceCode
+  externalScripts?: string[]
 }>()
 
 const toast = useToast()
@@ -13,8 +14,8 @@ const codeSteps = computed(() => {
   let step = 0
 
   // External scripts first (setup)
-  if (props.resource.externalScripts && props.resource.externalScripts.length > 0) {
-    const scriptTags = props.resource.externalScripts
+  if (props.externalScripts && props.externalScripts.length > 0) {
+    const scriptTags = props.externalScripts
       .map(src => `<script src="${src}"><` + '/script>')
       .join('\n')
     steps.push({
@@ -25,32 +26,32 @@ const codeSteps = computed(() => {
     })
   }
 
-  if (props.resource.htmlCode) {
+  if (props.code.htmlCode) {
     step++
     steps.push({
       label: `Step ${step}: Add HTML`,
       language: 'HTML',
-      code: props.resource.htmlCode,
+      code: props.code.htmlCode,
       step
     })
   }
 
-  if (props.resource.cssCode) {
+  if (props.code.cssCode) {
     step++
     steps.push({
       label: `Step ${step}: Add CSS`,
       language: 'CSS',
-      code: props.resource.cssCode,
+      code: props.code.cssCode,
       step
     })
   }
 
-  if (props.resource.jsCode) {
+  if (props.code.jsCode) {
     step++
     steps.push({
       label: `Step ${step}: Add Javascript`,
       language: 'Javascript',
-      code: props.resource.jsCode,
+      code: props.code.jsCode,
       step
     })
   }

@@ -3,7 +3,15 @@ import { APP } from '~/utils/constants'
 
 // Initialize auth state on app startup
 const { init: initAuth } = useAuth()
-onMounted(() => {
+onMounted(async () => {
+  // Ping Appwrite to verify connection (required for initial setup)
+  try {
+    const { client } = useAppwrite()
+    await client.ping()
+    console.log('Appwrite connection verified')
+  } catch {
+    console.warn('Appwrite ping failed – running in mock mode')
+  }
   initAuth()
 })
 
