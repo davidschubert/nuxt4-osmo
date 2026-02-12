@@ -15,6 +15,8 @@ onMounted(async () => {
   <UDashboardGroup>
     <VaultSidebar />
 
+    <AppSearch />
+
     <UDashboardPanel>
       <UDashboardNavbar>
         <template #leading>
