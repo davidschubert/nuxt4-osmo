@@ -80,7 +80,6 @@ Reference screenshots from the original OSMO Supply app are stored in `docs/refe
 | State | Pinia (@pinia/nuxt) | 0.11.3 |
 | Backend | Appwrite (appwrite SDK) | 22.0.0 |
 | Payments | Stripe | TBD |
-| Content | @nuxt/content | 3.11.2 |
 | Images | @nuxt/image | 2.0.0 |
 | Scripts | @nuxt/scripts | 0.13.2 |
 | Icons | Lucide + Simple Icons (Iconify) | - |
