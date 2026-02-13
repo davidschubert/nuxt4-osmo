@@ -10,6 +10,7 @@ useSeoMeta({
 
 const { user, isSubscribed } = useAuth()
 const authStore = useAuthStore()
+const { openPortal, portalLoading, mockCancelSubscription, isMockMode } = useSubscription()
 
 // Active tab for account sections
 const activeTab = ref('profile')
@@ -183,12 +184,17 @@ const subscriptionLabel = computed(() => {
               >
                 You are on the free plan. Upgrade to Pro to unlock all resources.
               </p>
-              <p
-                v-else
-                class="text-sm text-muted"
-              >
-                You have full access to all resources.
-              </p>
+              <template v-else>
+                <p class="text-sm text-muted">
+                  You have full access to all resources.
+                </p>
+                <p
+                  v-if="user?.subscribedAt"
+                  class="text-xs text-muted"
+                >
+                  Subscribed since {{ new Date(user.subscribedAt).toLocaleDateString() }}
+                </p>
+              </template>
             </div>
 
             <UButton
@@ -199,14 +205,21 @@ const subscriptionLabel = computed(() => {
             </UButton>
             <div
               v-else
-              class="space-y-2"
+              class="flex items-center gap-3"
             >
               <UButton
-                variant="link"
-                color="primary"
-                size="xs"
+                :loading="portalLoading"
+                @click="openPortal()"
               >
-                Change plan
+                Manage Subscription
+              </UButton>
+              <UButton
+                v-if="isMockMode"
+                variant="outline"
+                color="neutral"
+                @click="mockCancelSubscription()"
+              >
+                Cancel (Mock)
               </UButton>
             </div>
           </div>
@@ -217,24 +230,40 @@ const subscriptionLabel = computed(() => {
           <div class="space-y-6">
             <div class="space-y-2">
               <label class="text-xs font-medium text-muted uppercase tracking-wider">Payment Information</label>
-              <p class="text-sm text-muted">
-                No payment method on file
-              </p>
-              <UButton
-                variant="link"
-                color="primary"
-                size="xs"
+              <p
+                v-if="!isSubscribed"
+                class="text-sm text-muted"
               >
-                Add payment method
-              </UButton>
+                No payment method on file. Subscribe to add a payment method.
+              </p>
+              <template v-else>
+                <p class="text-sm text-muted">
+                  Payment methods and invoices are managed through the Stripe Customer Portal.
+                </p>
+                <UButton
+                  :loading="portalLoading"
+                  @click="openPortal()"
+                >
+                  Manage Billing
+                </UButton>
+              </template>
             </div>
 
             <USeparator />
 
             <div class="space-y-2">
               <label class="text-xs font-medium text-muted uppercase tracking-wider">Invoices</label>
-              <p class="text-sm text-muted">
+              <p
+                v-if="!isSubscribed"
+                class="text-sm text-muted"
+              >
                 No invoices yet
+              </p>
+              <p
+                v-else
+                class="text-sm text-muted"
+              >
+                View and download invoices in the Stripe Customer Portal.
               </p>
             </div>
           </div>

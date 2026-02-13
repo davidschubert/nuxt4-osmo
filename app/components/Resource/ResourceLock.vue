@@ -2,6 +2,17 @@
 defineProps<{
   resourceTitle?: string
 }>()
+
+const { isAuthenticated } = useAuth()
+const { startCheckout, checkoutLoading } = useSubscription()
+
+function handleUpgrade() {
+  if (!isAuthenticated.value) {
+    navigateTo('/register')
+  } else {
+    startCheckout()
+  }
+}
 </script>
 
 <template>
@@ -22,12 +33,22 @@ defineProps<{
           This resource is available to Pro members. Upgrade your plan to access the full code, preview, and documentation.
         </p>
       </div>
-      <UButton
-        to="/pricing"
-        label="Upgrade to Pro"
-        trailing-icon="i-lucide-arrow-right"
-        size="lg"
-      />
+      <div class="flex flex-col items-center gap-2">
+        <UButton
+          label="Upgrade to Pro"
+          trailing-icon="i-lucide-arrow-right"
+          size="lg"
+          :loading="checkoutLoading"
+          @click="handleUpgrade"
+        />
+        <UButton
+          to="/pricing"
+          variant="link"
+          color="neutral"
+          size="sm"
+          label="View plans"
+        />
+      </div>
     </div>
   </div>
 </template>

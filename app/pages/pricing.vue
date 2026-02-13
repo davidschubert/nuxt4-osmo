@@ -12,7 +12,31 @@ useSeoMeta({
   ogDescription: 'Choose the plan that fits your workflow. Start free or go Pro.'
 })
 
-const plans: PricingPlanProps[] = [
+const { isAuthenticated, isSubscribed } = useAuth()
+const { startCheckout, openPortal, checkoutLoading } = useSubscription()
+
+function handleProClick() {
+  if (!isAuthenticated.value) {
+    navigateTo('/register')
+  } else if (isSubscribed.value) {
+    openPortal()
+  } else {
+    startCheckout()
+  }
+}
+
+function handleLifetimeClick() {
+  if (!isAuthenticated.value) {
+    navigateTo('/register')
+  } else if (isSubscribed.value) {
+    openPortal()
+  } else {
+    // Use default price ID for now – lifetime price can be configured separately
+    startCheckout()
+  }
+}
+
+const plans = computed<PricingPlanProps[]>(() => [
   {
     title: 'Free',
     description: 'Perfect for exploring and getting started.',
@@ -27,11 +51,12 @@ const plans: PricingPlanProps[] = [
       'Community access'
     ],
     button: {
-      label: 'Get Started',
-      to: '/register',
+      label: isAuthenticated.value ? 'Current Plan' : 'Get Started',
+      to: isAuthenticated.value ? '/vault' : '/register',
       color: 'neutral',
-      variant: 'outline'
-    }
+      variant: 'outline',
+      disabled: isAuthenticated.value && !isSubscribed.value
+    } as ButtonProps
   },
   {
     title: 'Pro',
@@ -52,9 +77,10 @@ const plans: PricingPlanProps[] = [
       'Commercial license included'
     ],
     button: {
-      label: 'Subscribe to Pro',
-      to: '/register'
-    }
+      label: isSubscribed.value ? 'Manage Subscription' : 'Subscribe to Pro',
+      loading: checkoutLoading.value,
+      onClick: handleProClick
+    } as ButtonProps
   },
   {
     title: 'Lifetime',
@@ -70,13 +96,13 @@ const plans: PricingPlanProps[] = [
       'Early access to new features'
     ],
     button: {
-      label: 'Buy Lifetime',
-      to: '/register',
+      label: isSubscribed.value ? 'Manage Subscription' : 'Buy Lifetime',
       color: 'neutral',
-      variant: 'subtle'
-    }
+      variant: 'subtle',
+      onClick: handleLifetimeClick
+    } as ButtonProps
   }
-]
+])
 
 const faqItems = [
   {
