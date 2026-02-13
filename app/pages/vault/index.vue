@@ -13,6 +13,15 @@ const { user } = useAuth()
 const { filteredResources, totalResourceCount, loading } = useResources()
 const { searchQuery } = useSearch()
 const vaultStore = useVaultStore()
+const { refreshStatus } = useSubscription()
+
+// Handle post-checkout redirect: refresh subscription status
+onMounted(async () => {
+  if (route.query.checkout === 'success') {
+    await refreshStatus()
+    navigateTo('/vault', { replace: true })
+  }
+})
 
 // Sync category from URL query params
 watch(() => route.query.category, (category) => {

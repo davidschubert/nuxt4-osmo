@@ -39,6 +39,8 @@ export function useResources() {
       }
     } catch (error) {
       console.error('Failed to load resources:', error)
+      const toast = useToast()
+      toast.add({ title: 'Loading failed', description: 'Could not load resources. Please try again.', color: 'error' })
     } finally {
       vaultStore.setLoading(false)
     }
@@ -71,6 +73,8 @@ export function useResources() {
       }
     } catch (error) {
       console.error('Failed to load resource code:', error)
+      const toast = useToast()
+      toast.add({ title: 'Loading failed', description: 'Could not load resource code.', color: 'error' })
       return null
     }
   }

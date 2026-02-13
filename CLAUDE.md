@@ -443,14 +443,9 @@ interface UserProfile {
 | 5 | Resource Detail (Preview, Code Steps, Meta Sidebar, Lock) | ✅ Done |
 | 6 | Search (Command Palette, Meta+K, Keyboard Navigation) | ✅ Done |
 | 7 | Appwrite Anbindung (Dual-Mode Composables, SDK Migration) | ✅ Done |
+| 8 | Admin Panel (Middleware, CRUD, Dashboard, Categories) | ✅ Done |
 
 ### Offene Phasen
-
-**Phase 8: Admin Panel**
-- Admin Layout + Middleware (Appwrite Team/Label Check)
-- Resource CRUD (UTable, Create/Edit Formular, Thumbnail Upload)
-- Category Management (Name, Slug, Icon, Sort Order)
-- Admin Dashboard (Übersicht: Ressourcen-Count, User-Count)
 
 **Phase 9: Stripe & Premium**
 - Stripe Checkout Endpoint + Webhook Endpoint

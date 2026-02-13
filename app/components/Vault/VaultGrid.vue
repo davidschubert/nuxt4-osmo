@@ -44,13 +44,17 @@ defineProps<{
     <!-- Resource grid -->
     <div
       v-else
+      role="list"
+      aria-live="polite"
       class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
     >
-      <VaultCard
+      <div
         v-for="resource in resources"
         :key="resource.$id"
-        :resource="resource"
-      />
+        role="listitem"
+      >
+        <VaultCard :resource="resource" />
+      </div>
     </div>
   </div>
 </template>

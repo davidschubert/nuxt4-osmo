@@ -32,6 +32,8 @@ export function useCategories() {
       }
     } catch (error) {
       console.error('Failed to load categories:', error)
+      const toast = useToast()
+      toast.add({ title: 'Loading failed', description: 'Could not load categories.', color: 'error' })
     } finally {
       vaultStore.setLoading(false)
     }

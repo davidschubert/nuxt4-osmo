@@ -14,6 +14,11 @@ export default defineNuxtConfig({
     enabled: true
   },
 
+  app: {
+    pageTransition: { name: 'page', mode: 'out-in' },
+    layoutTransition: { name: 'layout', mode: 'out-in' }
+  },
+
   css: ['~/assets/css/main.css'],
 
   colorMode: {
@@ -34,6 +39,11 @@ export default defineNuxtConfig({
     }
   },
 
+  routeRules: {
+    '/': { prerender: true },
+    '/pricing': { prerender: true }
+  },
+
   compatibilityDate: '2025-01-15',
 
   eslint: {
@@ -43,5 +53,9 @@ export default defineNuxtConfig({
         braceStyle: '1tbs'
       }
     }
+  },
+
+  image: {
+    quality: 80
   }
 })
