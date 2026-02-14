@@ -9,6 +9,19 @@ onMounted(async () => {
     loadResources()
   ])
 })
+
+// Keyboard shortcuts
+defineShortcuts({
+  'g-h': {
+    handler: () => navigateTo('/vault')
+  },
+  'g-p': {
+    handler: () => navigateTo('/pricing')
+  },
+  'g-a': {
+    handler: () => navigateTo('/account')
+  }
+})
 </script>
 
 <template>

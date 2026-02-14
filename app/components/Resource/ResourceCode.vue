@@ -7,6 +7,7 @@ const props = defineProps<{
 }>()
 
 const toast = useToast()
+const { highlightCode, isReady } = useHighlighter()
 
 // Build code steps dynamically based on what code exists
 const codeSteps = computed(() => {
@@ -59,6 +60,27 @@ const codeSteps = computed(() => {
   return steps
 })
 
+// Highlighted HTML for each code step
+const highlightedBlocks = ref<Map<string, string>>(new Map())
+
+watch(
+  [codeSteps, isReady],
+  async () => {
+    if (!isReady.value) return
+    const newMap = new Map<string, string>()
+    for (const step of codeSteps.value) {
+      try {
+        const html = await highlightCode(step.code, step.language)
+        newMap.set(step.label, html)
+      } catch {
+        // Fallback: no highlighting
+      }
+    }
+    highlightedBlocks.value = newMap
+  },
+  { immediate: true }
+)
+
 async function copyCode(code: string) {
   try {
     await navigator.clipboard.writeText(code)
@@ -97,8 +119,16 @@ async function copyCode(code: string) {
           />
         </div>
 
-        <!-- Code content -->
-        <pre class="p-4 overflow-x-auto text-sm leading-relaxed"><code class="text-white/90 font-mono text-xs">{{ codeStep.code }}</code></pre>
+        <!-- Code content: highlighted or fallback -->
+        <div
+          v-if="highlightedBlocks.get(codeStep.label)"
+          class="p-4 overflow-x-auto text-sm leading-relaxed [&_pre]:!bg-transparent [&_pre]:!m-0 [&_pre]:!p-0 [&_code]:text-xs [&_code]:font-mono"
+          v-html="highlightedBlocks.get(codeStep.label)"
+        />
+        <pre
+          v-else
+          class="p-4 overflow-x-auto text-sm leading-relaxed"
+        ><code class="text-white/90 font-mono text-xs">{{ codeStep.code }}</code></pre>
       </div>
     </div>
   </div>

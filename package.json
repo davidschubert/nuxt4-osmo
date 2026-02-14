@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
     "test": "vitest run",
-    "test:watch": "vitest watch"
+    "test:watch": "vitest watch",
+    "seed": "tsx --env-file=.env scripts/seed.ts"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.89",
@@ -23,6 +24,7 @@
     "appwrite": "^22.0.0",
     "node-appwrite": "^22.0.0",
     "nuxt": "^4.3.1",
+    "shiki": "^3.22.0",
     "stripe": "^20.3.1",
     "tailwindcss": "^4.1.18",
     "zod": "^4.3.6"
@@ -34,6 +36,7 @@
     "eslint": "^10.0.0",
     "happy-dom": "^20.6.1",
     "pinia": "^3.0.4",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18",
     "vue-tsc": "^3.2.4"
