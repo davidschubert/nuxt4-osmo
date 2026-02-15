@@ -2,13 +2,9 @@ import { mockResources, mockResourceCodes } from '~/utils/mock-data'
 import type { Resource, ResourceCode } from '~/types'
 import { APPWRITE } from '~/utils/constants'
 
-// Auto-detect mock mode
-const MOCK_MODE = !import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT
-  || import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT === ''
-  || import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT === 'placeholder'
-
 export function useResources() {
   const vaultStore = useVaultStore()
+  const MOCK_MODE = isMockMode()
 
   /**
    * Load all resources from Appwrite or mock data

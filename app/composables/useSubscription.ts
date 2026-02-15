@@ -1,13 +1,9 @@
 import { APPWRITE } from '~/utils/constants'
 
-// Auto-detect mock mode (same pattern as useAuth, useResources)
-const MOCK_MODE = !import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT
-  || import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT === ''
-  || import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT === 'placeholder'
-
 export function useSubscription() {
   const authStore = useAuthStore()
   const toast = useToast()
+  const MOCK_MODE = isMockMode()
   const checkoutLoading = ref(false)
   const portalLoading = ref(false)
 

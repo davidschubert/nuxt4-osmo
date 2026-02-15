@@ -61,11 +61,6 @@ const providers = [
     label: 'Google',
     icon: 'i-simple-icons-google',
     onClick: () => loginWithOAuth('google')
-  },
-  {
-    label: 'Apple',
-    icon: 'i-simple-icons-apple',
-    onClick: () => loginWithOAuth('apple')
   }
 ]
 

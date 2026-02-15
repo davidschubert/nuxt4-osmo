@@ -2,13 +2,9 @@ import { mockCategories } from '~/utils/mock-data'
 import type { Category } from '~/types'
 import { APPWRITE } from '~/utils/constants'
 
-// Auto-detect mock mode
-const MOCK_MODE = !import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT
-  || import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT === ''
-  || import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT === 'placeholder'
-
 export function useCategories() {
   const vaultStore = useVaultStore()
+  const MOCK_MODE = isMockMode()
 
   /**
    * Load all categories from Appwrite or mock data

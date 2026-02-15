@@ -24,7 +24,7 @@ Manual end-to-end testing checklist for **The Vault**. Run through each section 
 - [ ] Footer links work (if present)
 - [ ] SEO meta tags present (`<title>`, `<meta name="description">`)
 
-### Pricing Page (`/pricing`)
+### Plans Page (`/plans`)
 
 - [ ] Page loads and displays pricing tiers
 - [ ] Free tier shows included features
@@ -53,7 +53,7 @@ Manual end-to-end testing checklist for **The Vault**. Run through each section 
 - [ ] Invalid credentials show error toast
 - [ ] Successful login redirects to `/vault`
 - [ ] Toast notification shows "Welcome back!"
-- [ ] OAuth buttons render (GitHub, Google, Apple)
+- [ ] OAuth buttons render (GitHub, Google)
 - [ ] OAuth flow initiates correctly (redirects to provider)
 
 ### Auth Middleware
@@ -109,7 +109,7 @@ Manual end-to-end testing checklist for **The Vault**. Run through each section 
 ### Keyboard Shortcuts
 
 - [ ] `g` then `h` navigates to `/vault`
-- [ ] `g` then `p` navigates to `/pricing`
+- [ ] `g` then `p` navigates to `/plans`
 - [ ] `g` then `a` navigates to `/account`
 
 ---
@@ -163,7 +163,7 @@ Manual end-to-end testing checklist for **The Vault**. Run through each section 
 - [ ] Free resources: code and preview fully accessible
 - [ ] Premium resources (non-subscriber): code is blurred/locked
 - [ ] Lock overlay shows upgrade CTA
-- [ ] Upgrade CTA links to `/pricing`
+- [ ] Upgrade CTA links to `/plans`
 - [ ] Premium resources (subscriber): code fully accessible
 
 ---
@@ -172,7 +172,7 @@ Manual end-to-end testing checklist for **The Vault**. Run through each section 
 
 ### Mock Mode Checkout
 
-- [ ] Clicking "Subscribe" on pricing page triggers mock checkout
+- [ ] Clicking "Subscribe" on plans page triggers mock checkout
 - [ ] After mock checkout, user profile updates to `subscriptionStatus: 'active'`
 - [ ] Previously locked resources become accessible
 - [ ] Toast notification confirms subscription

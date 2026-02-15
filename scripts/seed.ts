@@ -2,15 +2,18 @@
  * Seed script — uploads mock data to Appwrite
  *
  * Usage:
- *   pnpm seed
+ *   pnpm seed              # Skip existing documents
+ *   pnpm seed --replace    # Delete all existing documents, then recreate
  *
  * Requires .env with:
  *   NUXT_PUBLIC_APPWRITE_ENDPOINT
  *   NUXT_PUBLIC_APPWRITE_PROJECT
- *   APPWRITE_API_KEY  (server-side key with databases.read + databases.write)
+ *   NUXT_APPWRITE_API_KEY  (or APPWRITE_API_KEY — server-side key with databases.read + databases.write)
  */
 
-import { Client, Databases, Permission, Role } from 'node-appwrite'
+import { Client, Databases, Permission, Role, Query } from 'node-appwrite'
+
+const REPLACE_MODE = process.argv.includes('--replace')
 
 // ---------------------------------------------------------------------------
 // Appwrite constants (duplicated from app/utils/constants.ts to avoid ~/alias)
@@ -598,6 +601,31 @@ async function documentExists(
   }
 }
 
+/**
+ * Delete ALL documents in a collection (paginated — handles >25 docs)
+ */
+async function deleteAllDocuments(
+  db: Databases,
+  collectionId: string
+): Promise<number> {
+  let deleted = 0
+  let hasMore = true
+  while (hasMore) {
+    const batch = await db.listDocuments(DATABASE_ID, collectionId, [
+      Query.limit(100)
+    ])
+    if (batch.documents.length === 0) {
+      hasMore = false
+      break
+    }
+    for (const doc of batch.documents) {
+      await db.deleteDocument(DATABASE_ID, collectionId, doc.$id)
+      deleted++
+    }
+  }
+  return deleted
+}
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -605,17 +633,18 @@ async function documentExists(
 async function main() {
   const endpoint = process.env.NUXT_PUBLIC_APPWRITE_ENDPOINT
   const project = process.env.NUXT_PUBLIC_APPWRITE_PROJECT
-  const apiKey = process.env.APPWRITE_API_KEY
+  const apiKey = process.env.NUXT_APPWRITE_API_KEY || process.env.APPWRITE_API_KEY
 
   if (!endpoint || !project || !apiKey) {
     console.error('Missing environment variables. Required:')
     console.error('  NUXT_PUBLIC_APPWRITE_ENDPOINT')
     console.error('  NUXT_PUBLIC_APPWRITE_PROJECT')
-    console.error('  APPWRITE_API_KEY')
+    console.error('  NUXT_APPWRITE_API_KEY (or APPWRITE_API_KEY)')
     process.exit(1)
   }
 
-  console.log(`\nConnecting to ${endpoint} (project: ${project})...\n`)
+  console.log(`\nConnecting to ${endpoint} (project: ${project})...`)
+  console.log(`Mode: ${REPLACE_MODE ? '🔄 REPLACE (delete + recreate)' : '⏭️  SKIP existing'}\n`)
 
   const client = new Client()
     .setEndpoint(endpoint)
@@ -624,11 +653,23 @@ async function main() {
 
   const db = new Databases(client)
 
+  // --- Delete phase (only in replace mode) ---
+  if (REPLACE_MODE) {
+    console.log('--- Deleting existing documents ---')
+    const deletedCodes = await deleteAllDocuments(db, COLLECTIONS.RESOURCE_CODE)
+    console.log(`  🗑️  Deleted ${deletedCodes} resource-codes`)
+    const deletedResources = await deleteAllDocuments(db, COLLECTIONS.RESOURCES)
+    console.log(`  🗑️  Deleted ${deletedResources} resources`)
+    const deletedCategories = await deleteAllDocuments(db, COLLECTIONS.CATEGORIES)
+    console.log(`  🗑️  Deleted ${deletedCategories} categories`)
+    console.log('')
+  }
+
   // --- Categories ---
   console.log('--- Categories ---')
   for (const cat of categories) {
     const { $id, ...data } = cat
-    if (await documentExists(db, COLLECTIONS.CATEGORIES, $id)) {
+    if (!REPLACE_MODE && await documentExists(db, COLLECTIONS.CATEGORIES, $id)) {
       console.log(`  \u2298 Skipped (exists): ${cat.name}`)
     } else {
       await db.createDocument(
@@ -646,7 +687,7 @@ async function main() {
   console.log('\n--- Resources ---')
   for (const res of resources) {
     const { $id, ...data } = res
-    if (await documentExists(db, COLLECTIONS.RESOURCES, $id)) {
+    if (!REPLACE_MODE && await documentExists(db, COLLECTIONS.RESOURCES, $id)) {
       console.log(`  \u2298 Skipped (exists): ${res.title}`)
     } else {
       await db.createDocument(
@@ -664,7 +705,7 @@ async function main() {
   console.log('\n--- Resource Codes ---')
   for (const code of resourceCodes) {
     const { $id, ...data } = code
-    if (await documentExists(db, COLLECTIONS.RESOURCE_CODE, $id)) {
+    if (!REPLACE_MODE && await documentExists(db, COLLECTIONS.RESOURCE_CODE, $id)) {
       console.log(`  \u2298 Skipped (exists): ${code.$id}`)
     } else {
       await db.createDocument(
@@ -678,7 +719,7 @@ async function main() {
     }
   }
 
-  console.log('\nSeed complete!\n')
+  console.log('\n✅ Seed complete!\n')
 }
 
 main().catch((err) => {

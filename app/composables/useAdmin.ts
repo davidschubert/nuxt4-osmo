@@ -1,14 +1,10 @@
 import type { Resource, ResourceCode, Category } from '~/types'
 import { APPWRITE } from '~/utils/constants'
 
-// Auto-detect mock mode
-const MOCK_MODE = !import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT
-  || import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT === ''
-  || import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT === 'placeholder'
-
 export function useAdmin() {
   const vaultStore = useVaultStore()
   const toast = useToast()
+  const MOCK_MODE = isMockMode()
 
   // ─── Resources ──────────────────────────────
 

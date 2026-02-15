@@ -26,7 +26,7 @@ useSeoMeta({
       </p>
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
         <UButton
-          to="/pricing"
+          to="/plans"
           size="lg"
         >
           View plans

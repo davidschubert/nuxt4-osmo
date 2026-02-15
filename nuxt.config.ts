@@ -45,7 +45,7 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/': { prerender: true },
-    '/pricing': { prerender: true }
+    '/plans': { prerender: true }
   },
 
   compatibilityDate: '2025-01-15',

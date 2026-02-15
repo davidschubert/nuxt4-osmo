@@ -44,7 +44,7 @@ export function useSearch() {
     // Page group – static navigation links
     const pageItems = [
       { id: 'page-vault', title: 'The Vault', to: '/vault', icon: 'i-lucide-layout-grid' },
-      { id: 'page-pricing', title: 'Pricing', to: '/pricing', icon: 'i-lucide-credit-card' },
+      { id: 'page-plans', title: 'Plans', to: '/plans', icon: 'i-lucide-credit-card' },
       { id: 'page-account', title: 'Account Settings', to: '/account', icon: 'i-lucide-user' }
     ]
 

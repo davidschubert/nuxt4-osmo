@@ -20,8 +20,8 @@ const heroLinks: ButtonProps[] = [
     size: 'xl'
   },
   {
-    label: 'View Pricing',
-    to: '/pricing',
+    label: 'View Plans',
+    to: '/plans',
     size: 'xl',
     color: 'neutral',
     variant: 'outline'
@@ -69,8 +69,8 @@ const ctaLinks: ButtonProps[] = [
     color: 'neutral'
   },
   {
-    label: 'View Pricing',
-    to: '/pricing',
+    label: 'View Plans',
+    to: '/plans',
     color: 'neutral',
     variant: 'outline'
   }

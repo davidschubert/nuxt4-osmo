@@ -2,11 +2,6 @@ import { mockUser } from '~/utils/mock-data'
 import type { UserProfile } from '~/types'
 import { APPWRITE } from '~/utils/constants'
 
-// Auto-detect mock mode: active when no Appwrite project is configured
-const MOCK_MODE = !import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT
-  || import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT === ''
-  || import.meta.env.NUXT_PUBLIC_APPWRITE_PROJECT === 'placeholder'
-
 interface LoginParams {
   email: string
   password: string
@@ -73,8 +68,8 @@ async function ensureProfile(
           Permission.update(Role.user(user.$id as string))
         ]
       })
-    } catch {
-      // Profile creation may fail if collection isn't set up yet
+    } catch (err) {
+      console.error('[ensureProfile] Failed to create user profile:', err)
       return null
     }
   }
@@ -83,6 +78,7 @@ async function ensureProfile(
 export function useAuth() {
   const authStore = useAuthStore()
   const toast = useToast()
+  const MOCK_MODE = isMockMode()
 
   /**
    * Initialize auth state – check if user has an active session
@@ -223,8 +219,8 @@ export function useAuth() {
           await account.createVerification({
             url: `${window.location.origin}/verify-email`
           })
-        } catch {
-          // Verification email may fail — non-critical
+        } catch (err) {
+          console.error('[register] Failed to send verification email:', err)
         }
 
         toast.add({
@@ -293,7 +289,7 @@ export function useAuth() {
    * Login with OAuth provider
    * Note: OAuth redirects the browser, so this function does not return in real mode
    */
-  async function loginWithOAuth(provider: 'github' | 'google' | 'apple') {
+  async function loginWithOAuth(provider: 'github' | 'google') {
     authStore.setLoading(true)
     try {
       if (MOCK_MODE) {
@@ -314,8 +310,7 @@ export function useAuth() {
         const { account, OAuthProvider } = useAppwrite()
         const providerMap: Record<string, string> = {
           github: OAuthProvider.Github,
-          google: OAuthProvider.Google,
-          apple: OAuthProvider.Apple
+          google: OAuthProvider.Google
         }
         // OAuth redirects the browser – this call does not return
         account.createOAuth2Session({
@@ -332,6 +327,108 @@ export function useAuth() {
     }
   }
 
+  /**
+   * Update display name
+   */
+  async function updateDisplayName(name: string) {
+    if (!name.trim()) {
+      toast.add({ title: 'Error', description: 'Name cannot be empty.', color: 'error' })
+      return
+    }
+    try {
+      if (MOCK_MODE) {
+        if (authStore.user) {
+          const updated = { ...authStore.user, displayName: name }
+          authStore.setUser(updated)
+          if (import.meta.client) {
+            localStorage.setItem('vault-mock-session', JSON.stringify(updated))
+          }
+        }
+      } else {
+        const { account, databases } = useAppwrite()
+        await account.updateName({ name })
+        // Also update user profile document
+        if (authStore.user) {
+          try {
+            await databases.updateDocument({
+              databaseId: APPWRITE.DATABASE_ID,
+              collectionId: APPWRITE.COLLECTIONS.USER_PROFILES,
+              documentId: authStore.user.userId,
+              data: { displayName: name }
+            })
+          } catch {
+            // Profile update is non-critical
+          }
+          authStore.setUser({ ...authStore.user, displayName: name })
+        }
+      }
+      toast.add({ title: 'Name updated', description: 'Your display name has been changed.' })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Could not update name.'
+      toast.add({ title: 'Update failed', description: message, color: 'error' })
+      throw error
+    }
+  }
+
+  /**
+   * Update email (requires current password for verification)
+   */
+  async function updateUserEmail(newEmail: string, password: string) {
+    if (!newEmail.trim() || !password) {
+      toast.add({ title: 'Error', description: 'Email and password are required.', color: 'error' })
+      return
+    }
+    try {
+      if (MOCK_MODE) {
+        if (authStore.user) {
+          const updated = { ...authStore.user, email: newEmail }
+          authStore.setUser(updated)
+          if (import.meta.client) {
+            localStorage.setItem('vault-mock-session', JSON.stringify(updated))
+          }
+        }
+      } else {
+        const { account } = useAppwrite()
+        await account.updateEmail({ email: newEmail, password })
+        if (authStore.user) {
+          authStore.setUser({ ...authStore.user, email: newEmail })
+        }
+      }
+      toast.add({ title: 'Email updated', description: 'Your email address has been changed.' })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Could not update email.'
+      toast.add({ title: 'Update failed', description: message, color: 'error' })
+      throw error
+    }
+  }
+
+  /**
+   * Update password (requires current password)
+   */
+  async function updatePassword(oldPassword: string, newPassword: string) {
+    if (!oldPassword || !newPassword) {
+      toast.add({ title: 'Error', description: 'Both passwords are required.', color: 'error' })
+      return
+    }
+    if (newPassword.length < 8) {
+      toast.add({ title: 'Error', description: 'New password must be at least 8 characters.', color: 'error' })
+      return
+    }
+    try {
+      if (MOCK_MODE) {
+        await new Promise(resolve => setTimeout(resolve, 300))
+      } else {
+        const { account } = useAppwrite()
+        await account.updatePassword({ password: newPassword, oldPassword })
+      }
+      toast.add({ title: 'Password updated', description: 'Your password has been changed.' })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Could not update password.'
+      toast.add({ title: 'Update failed', description: message, color: 'error' })
+      throw error
+    }
+  }
+
   return {
     init,
     login,
@@ -339,6 +436,9 @@ export function useAuth() {
     logout,
     loginWithOAuth,
     resendVerification,
+    updateDisplayName,
+    updateUserEmail,
+    updatePassword,
     user: computed(() => authStore.user),
     isAuthenticated: computed(() => authStore.isAuthenticated),
     isAdmin: computed(() => authStore.isAdmin),

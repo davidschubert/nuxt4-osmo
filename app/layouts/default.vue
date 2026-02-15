@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const navLinks = [
   { label: 'Features', to: '/#features' },
-  { label: 'Pricing', to: '/pricing' }
+  { label: 'Plans', to: '/plans' }
 ]
 
 const footerLinks = [
@@ -9,7 +9,7 @@ const footerLinks = [
     label: 'Product',
     children: [
       { label: 'Features', to: '/#features' },
-      { label: 'Pricing', to: '/pricing' },
+      { label: 'Plans', to: '/plans' },
       { label: 'Changelog', to: '#' }
     ]
   },

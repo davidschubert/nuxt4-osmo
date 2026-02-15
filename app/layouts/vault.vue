@@ -29,7 +29,7 @@ defineShortcuts({
     handler: () => navigateTo('/vault')
   },
   'g-p': {
-    handler: () => navigateTo('/pricing')
+    handler: () => navigateTo('/plans')
   },
   'g-a': {
     handler: () => navigateTo('/account')

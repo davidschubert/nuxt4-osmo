@@ -63,12 +63,12 @@ describe('useSearch', () => {
     expect(firstCat.title).toBe(mockCategories[0].name)
   })
 
-  it('searchGroups pages group has vault, pricing, account', () => {
+  it('searchGroups pages group has vault, plans, account', () => {
     const { searchGroups } = useSearch()
     const pagesGroup = searchGroups.value.find(g => g.id === 'pages')!
     const pagePaths = pagesGroup.items.map(p => p.to)
     expect(pagePaths).toContain('/vault')
-    expect(pagePaths).toContain('/pricing')
+    expect(pagePaths).toContain('/plans')
     expect(pagePaths).toContain('/account')
   })
 

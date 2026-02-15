@@ -11,7 +11,8 @@
     "typecheck": "nuxt typecheck",
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "seed": "tsx --env-file=.env scripts/seed.ts"
+    "seed": "tsx --env-file=.env scripts/seed.ts",
+    "set-admin": "tsx --env-file=.env scripts/set-admin.ts"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.89",

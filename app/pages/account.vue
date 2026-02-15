@@ -8,7 +8,7 @@ useSeoMeta({
   title: 'Account - The Vault'
 })
 
-const { user, isSubscribed } = useAuth()
+const { user, isSubscribed, updateDisplayName, updateUserEmail, updatePassword } = useAuth()
 const authStore = useAuthStore()
 const { openPortal, portalLoading, mockCancelSubscription, isMockMode } = useSubscription()
 
@@ -35,6 +35,85 @@ const subscriptionLabel = computed(() => {
       return 'Free Plan'
   }
 })
+
+// --- Modal state ---
+const showNameModal = ref(false)
+const showEmailModal = ref(false)
+const showPasswordModal = ref(false)
+
+// --- Form data ---
+const nameForm = ref('')
+const emailForm = reactive({ email: '', password: '' })
+const passwordForm = reactive({ oldPassword: '', newPassword: '', confirmPassword: '' })
+
+// --- Loading state ---
+const nameLoading = ref(false)
+const emailLoading = ref(false)
+const passwordLoading = ref(false)
+
+// --- Handlers ---
+function openNameModal() {
+  nameForm.value = user.value?.displayName || ''
+  showNameModal.value = true
+}
+
+function openEmailModal() {
+  emailForm.email = ''
+  emailForm.password = ''
+  showEmailModal.value = true
+}
+
+function openPasswordModal() {
+  passwordForm.oldPassword = ''
+  passwordForm.newPassword = ''
+  passwordForm.confirmPassword = ''
+  showPasswordModal.value = true
+}
+
+async function submitName() {
+  nameLoading.value = true
+  try {
+    await updateDisplayName(nameForm.value)
+    showNameModal.value = false
+  } catch {
+    // Toast already shown by composable
+  } finally {
+    nameLoading.value = false
+  }
+}
+
+async function submitEmail() {
+  emailLoading.value = true
+  try {
+    await updateUserEmail(emailForm.email, emailForm.password)
+    showEmailModal.value = false
+  } catch {
+    // Toast already shown by composable
+  } finally {
+    emailLoading.value = false
+  }
+}
+
+const passwordError = computed(() => {
+  if (passwordForm.newPassword && passwordForm.confirmPassword
+    && passwordForm.newPassword !== passwordForm.confirmPassword) {
+    return 'Passwords do not match'
+  }
+  return ''
+})
+
+async function submitPassword() {
+  if (passwordForm.newPassword !== passwordForm.confirmPassword) return
+  passwordLoading.value = true
+  try {
+    await updatePassword(passwordForm.oldPassword, passwordForm.newPassword)
+    showPasswordModal.value = false
+  } catch {
+    // Toast already shown by composable
+  } finally {
+    passwordLoading.value = false
+  }
+}
 </script>
 
 <template>
@@ -98,6 +177,7 @@ const subscriptionLabel = computed(() => {
                 variant="link"
                 color="primary"
                 size="xs"
+                @click="openNameModal"
               >
                 Change name
               </UButton>
@@ -115,6 +195,7 @@ const subscriptionLabel = computed(() => {
                 variant="link"
                 color="primary"
                 size="xs"
+                @click="openEmailModal"
               >
                 Change email
               </UButton>
@@ -132,6 +213,7 @@ const subscriptionLabel = computed(() => {
                 variant="link"
                 color="primary"
                 size="xs"
+                @click="openPasswordModal"
               >
                 Change password
               </UButton>
@@ -210,7 +292,7 @@ const subscriptionLabel = computed(() => {
 
             <UButton
               v-if="!isSubscribed"
-              to="/pricing"
+              to="/plans"
             >
               View Plans
             </UButton>
@@ -287,5 +369,139 @@ const subscriptionLabel = computed(() => {
         </div>
       </div>
     </div>
+
+    <!-- Change Name Modal -->
+    <UModal v-model:open="showNameModal">
+      <template #content>
+        <div class="p-6 space-y-4">
+          <h3 class="text-lg font-semibold">
+            Change Name
+          </h3>
+          <UFormField label="Display Name">
+            <UInput
+              v-model="nameForm"
+              placeholder="Your name"
+              autofocus
+              @keydown.enter="submitName"
+            />
+          </UFormField>
+          <div class="flex justify-end gap-3">
+            <UButton
+              variant="outline"
+              color="neutral"
+              @click="showNameModal = false"
+            >
+              Cancel
+            </UButton>
+            <UButton
+              :loading="nameLoading"
+              :disabled="!nameForm.trim()"
+              @click="submitName"
+            >
+              Save
+            </UButton>
+          </div>
+        </div>
+      </template>
+    </UModal>
+
+    <!-- Change Email Modal -->
+    <UModal v-model:open="showEmailModal">
+      <template #content>
+        <div class="p-6 space-y-4">
+          <h3 class="text-lg font-semibold">
+            Change Email
+          </h3>
+          <UFormField label="New Email">
+            <UInput
+              v-model="emailForm.email"
+              type="email"
+              placeholder="new@example.com"
+              autofocus
+            />
+          </UFormField>
+          <UFormField label="Current Password">
+            <UInput
+              v-model="emailForm.password"
+              type="password"
+              placeholder="Enter your current password"
+              @keydown.enter="submitEmail"
+            />
+          </UFormField>
+          <div class="flex justify-end gap-3">
+            <UButton
+              variant="outline"
+              color="neutral"
+              @click="showEmailModal = false"
+            >
+              Cancel
+            </UButton>
+            <UButton
+              :loading="emailLoading"
+              :disabled="!emailForm.email.trim() || !emailForm.password"
+              @click="submitEmail"
+            >
+              Save
+            </UButton>
+          </div>
+        </div>
+      </template>
+    </UModal>
+
+    <!-- Change Password Modal -->
+    <UModal v-model:open="showPasswordModal">
+      <template #content>
+        <div class="p-6 space-y-4">
+          <h3 class="text-lg font-semibold">
+            Change Password
+          </h3>
+          <UFormField label="Current Password">
+            <UInput
+              v-model="passwordForm.oldPassword"
+              type="password"
+              placeholder="Current password"
+              autofocus
+            />
+          </UFormField>
+          <UFormField
+            label="New Password"
+            :error="passwordError"
+          >
+            <UInput
+              v-model="passwordForm.newPassword"
+              type="password"
+              placeholder="New password (min. 8 characters)"
+            />
+          </UFormField>
+          <UFormField
+            label="Confirm New Password"
+            :error="passwordError"
+          >
+            <UInput
+              v-model="passwordForm.confirmPassword"
+              type="password"
+              placeholder="Confirm new password"
+              @keydown.enter="submitPassword"
+            />
+          </UFormField>
+          <div class="flex justify-end gap-3">
+            <UButton
+              variant="outline"
+              color="neutral"
+              @click="showPasswordModal = false"
+            >
+              Cancel
+            </UButton>
+            <UButton
+              :loading="passwordLoading"
+              :disabled="!passwordForm.oldPassword || !passwordForm.newPassword || !passwordForm.confirmPassword || !!passwordError"
+              @click="submitPassword"
+            >
+              Save
+            </UButton>
+          </div>
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>

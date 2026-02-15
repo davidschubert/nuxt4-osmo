@@ -42,7 +42,7 @@ function handleUpgrade() {
           @click="handleUpgrade"
         />
         <UButton
-          to="/pricing"
+          to="/plans"
           variant="link"
           color="neutral"
           size="sm"

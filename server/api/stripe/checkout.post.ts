@@ -69,7 +69,7 @@ export default defineEventHandler(async (event) => {
     mode,
     line_items: [{ price: body.priceId, quantity: 1 }],
     success_url: `${appUrl}/checkout/success`,
-    cancel_url: `${appUrl}/pricing?checkout=canceled`,
+    cancel_url: `${appUrl}/plans?checkout=canceled`,
     metadata: {
       appwriteUserId: body.userId,
       checkoutMode: mode
