@@ -1,7 +1,8 @@
 interface CheckoutBody {
   userId: string
   userEmail: string
-  priceId?: string
+  priceId: string
+  checkoutMode?: 'subscription' | 'payment'
 }
 
 export default defineEventHandler(async (event) => {
@@ -14,17 +15,17 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  if (!body.priceId) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'priceId is required'
+    })
+  }
+
   const stripe = useStripe()
   const { databases } = useAppwriteAdmin()
   const config = useRuntimeConfig()
-  const priceId = body.priceId || config.public.stripePriceId as string
-
-  if (!priceId) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Stripe price ID is not configured'
-    })
-  }
+  const mode = body.checkoutMode || 'subscription'
 
   // Check if user already has a Stripe customer ID
   let stripeCustomerId: string | undefined
@@ -65,11 +66,14 @@ export default defineEventHandler(async (event) => {
   const appUrl = config.public.appUrl as string || 'http://localhost:3000'
   const session = await stripe.checkout.sessions.create({
     customer: stripeCustomerId,
-    mode: 'subscription',
-    line_items: [{ price: priceId, quantity: 1 }],
+    mode,
+    line_items: [{ price: body.priceId, quantity: 1 }],
     success_url: `${appUrl}/checkout/success`,
     cancel_url: `${appUrl}/pricing?checkout=canceled`,
-    metadata: { appwriteUserId: body.userId }
+    metadata: {
+      appwriteUserId: body.userId,
+      checkoutMode: mode
+    }
   })
 
   return { url: session.url }

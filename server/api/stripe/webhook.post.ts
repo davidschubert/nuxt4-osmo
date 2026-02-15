@@ -102,21 +102,40 @@ export default defineEventHandler(async (event) => {
         break
       }
 
-      const subscriptionId = session.subscription as string
-      if (!subscriptionId) break
+      const checkoutMode = session.metadata?.checkoutMode || session.mode
 
-      await databases.updateDocument(
-        APPWRITE_DB.DATABASE_ID,
-        APPWRITE_DB.COLLECTIONS.USER_PROFILES,
-        userId,
-        {
-          subscriptionStatus: 'active',
-          stripeSubscriptionId: subscriptionId,
-          stripeCustomerId: session.customer as string,
-          subscribedAt: new Date().toISOString()
-        }
-      )
-      console.log(`User ${userId} subscription activated`)
+      if (checkoutMode === 'payment') {
+        // Lifetime / one-time payment
+        await databases.updateDocument(
+          APPWRITE_DB.DATABASE_ID,
+          APPWRITE_DB.COLLECTIONS.USER_PROFILES,
+          userId,
+          {
+            subscriptionStatus: 'active',
+            stripeCustomerId: session.customer as string,
+            planType: 'lifetime',
+            subscribedAt: new Date().toISOString()
+          }
+        )
+        console.log(`User ${userId} lifetime purchase activated`)
+      } else {
+        // Subscription (Solo or Team)
+        const subscriptionId = session.subscription as string
+        if (!subscriptionId) break
+
+        await databases.updateDocument(
+          APPWRITE_DB.DATABASE_ID,
+          APPWRITE_DB.COLLECTIONS.USER_PROFILES,
+          userId,
+          {
+            subscriptionStatus: 'active',
+            stripeSubscriptionId: subscriptionId,
+            stripeCustomerId: session.customer as string,
+            subscribedAt: new Date().toISOString()
+          }
+        )
+        console.log(`User ${userId} subscription activated`)
+      }
       break
     }
 
@@ -148,7 +167,8 @@ export default defineEventHandler(async (event) => {
         {
           subscriptionStatus: 'free',
           stripeSubscriptionId: null,
-          subscribedAt: null
+          subscribedAt: null,
+          planType: null
         }
       )
       console.log(`User ${userId} subscription deleted`)

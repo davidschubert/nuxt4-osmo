@@ -12,7 +12,20 @@ useSeoMeta({
   description: 'Create your free Vault account and start exploring resources.'
 })
 
-const { register, loginWithOAuth, loading } = useAuth()
+const route = useRoute()
+const { register, loginWithOAuth, resendVerification, loading } = useAuth()
+
+const isVerifyPending = computed(() => route.query.verify === 'pending')
+const resending = ref(false)
+
+async function handleResend() {
+  resending.value = true
+  try {
+    await resendVerification()
+  } finally {
+    resending.value = false
+  }
+}
 
 const fields: AuthFormField[] = [
   {
@@ -75,7 +88,47 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
 
 <template>
   <div class="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] px-4 py-12">
-    <UPageCard class="w-full max-w-md">
+    <!-- Verify pending state -->
+    <UPageCard
+      v-if="isVerifyPending"
+      class="w-full max-w-md text-center"
+    >
+      <div class="space-y-4">
+        <UIcon
+          name="i-lucide-mail-check"
+          class="size-12 text-primary mx-auto"
+        />
+        <h2 class="text-xl font-bold">
+          Check your email
+        </h2>
+        <p class="text-sm text-muted">
+          We sent a verification link to your email address. Please click the link to verify your account and unlock all features.
+        </p>
+        <div class="flex flex-col gap-2 pt-2">
+          <UButton
+            label="Resend verification email"
+            variant="outline"
+            color="neutral"
+            :loading="resending"
+            @click="handleResend"
+          />
+          <UButton
+            to="/vault"
+            label="Continue to Vault"
+            color="primary"
+          />
+        </div>
+        <p class="text-xs text-muted">
+          You can use the Vault right away — verify your email to unlock premium resources.
+        </p>
+      </div>
+    </UPageCard>
+
+    <!-- Registration form -->
+    <UPageCard
+      v-else
+      class="w-full max-w-md"
+    >
       <UAuthForm
         :schema="schema"
         :fields="fields"

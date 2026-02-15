@@ -19,13 +19,16 @@ const tabs = [
   { label: 'Profile', value: 'profile', icon: 'i-lucide-user' },
   { label: 'Account', value: 'account', icon: 'i-lucide-settings' },
   { label: 'Plan', value: 'plan', icon: 'i-lucide-credit-card' },
+  { label: 'Team', value: 'team', icon: 'i-lucide-users' },
   { label: 'Billing', value: 'billing', icon: 'i-lucide-receipt' }
 ]
 
 const subscriptionLabel = computed(() => {
+  if (user.value?.planType === 'lifetime') return 'Lifetime Member'
+  if (user.value?.planType === 'team') return 'Team Plan'
   switch (user.value?.subscriptionStatus) {
     case 'active':
-      return 'Pro Member'
+      return 'Solo Plan'
     case 'canceled':
       return 'Canceled'
     default:
@@ -182,7 +185,7 @@ const subscriptionLabel = computed(() => {
                 v-if="!isSubscribed"
                 class="text-sm text-muted"
               >
-                You are on the free plan. Upgrade to Pro to unlock all resources.
+                You are on the free plan. Upgrade to unlock all resources.
               </p>
               <template v-else>
                 <p class="text-sm text-muted">
@@ -194,6 +197,14 @@ const subscriptionLabel = computed(() => {
                 >
                   Subscribed since {{ new Date(user.subscribedAt).toLocaleDateString() }}
                 </p>
+                <UBadge
+                  v-if="user?.planType === 'lifetime'"
+                  color="warning"
+                  variant="subtle"
+                  size="sm"
+                >
+                  Lifetime — no recurring payments
+                </UBadge>
               </template>
             </div>
 
@@ -201,13 +212,14 @@ const subscriptionLabel = computed(() => {
               v-if="!isSubscribed"
               to="/pricing"
             >
-              Upgrade to Pro
+              View Plans
             </UButton>
             <div
               v-else
               class="flex items-center gap-3"
             >
               <UButton
+                v-if="user?.planType !== 'lifetime'"
                 :loading="portalLoading"
                 @click="openPortal()"
               >
@@ -223,6 +235,11 @@ const subscriptionLabel = computed(() => {
               </UButton>
             </div>
           </div>
+        </div>
+
+        <!-- Team Tab -->
+        <div v-if="activeTab === 'team'">
+          <AccountTeam />
         </div>
 
         <!-- Billing Tab -->

@@ -6,7 +6,8 @@ export const APPWRITE = {
     RESOURCES: 'resources',
     RESOURCE_CODE: 'resource-code',
     CATEGORIES: 'categories',
-    USER_PROFILES: 'user-profiles'
+    USER_PROFILES: 'user-profiles',
+    TEAMS: 'teams'
   },
   BUCKETS: {
     THUMBNAILS: 'thumbnails',
@@ -35,6 +36,28 @@ export const SIDEBAR_EXTRA_ITEMS = [
   { slug: 'learn', name: 'Learn', icon: 'i-lucide-book-open', to: '/vault/learn' },
   { slug: 'easings', name: 'Easings', icon: 'i-lucide-spline', to: '/vault/easings', disabled: true, badge: 'Soon' }
 ] as const
+
+// Pricing plans configuration (EUR)
+export const PRICING = {
+  SOLO: {
+    name: 'Solo',
+    seats: 1,
+    quarterly: { price: 75, label: '75,00 €', perMonth: '25,00 €' },
+    yearly: { price: 240, label: '240,00 €', perMonth: '20,00 €' }
+  },
+  TEAM: {
+    name: 'Team',
+    seats: 2,
+    quarterly: { price: 120, label: '120,00 €', perMonth: '40,00 €' },
+    yearly: { price: 384, label: '384,00 €', perMonth: '32,00 €' }
+  },
+  LIFETIME: {
+    name: 'Lifetime',
+    seats: 1,
+    price: 599,
+    label: '599,00 €'
+  }
+} as const
 
 // App metadata
 export const APP = {

@@ -4,6 +4,7 @@ import type { UserProfile, SubscriptionStatus } from '~/types'
 interface AuthState {
   user: UserProfile | null
   accountLabels: string[]
+  emailVerified: boolean
   loading: boolean
   initialized: boolean
 }
@@ -12,6 +13,7 @@ export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     user: null,
     accountLabels: [],
+    emailVerified: false,
     loading: false,
     initialized: false
   }),
@@ -20,6 +22,7 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state): boolean => !!state.user,
     isAdmin: (state): boolean => state.accountLabels.includes('admin'),
     isSubscribed: (state): boolean => state.user?.subscriptionStatus === 'active',
+    isEmailVerified: (state): boolean => state.emailVerified,
     subscriptionStatus: (state): SubscriptionStatus => state.user?.subscriptionStatus ?? 'free',
     displayName: (state): string => state.user?.displayName ?? '',
     initials: (state): string => {
@@ -42,6 +45,10 @@ export const useAuthStore = defineStore('auth', {
       this.accountLabels = labels
     },
 
+    setEmailVerified(verified: boolean) {
+      this.emailVerified = verified
+    },
+
     setLoading(loading: boolean) {
       this.loading = loading
     },
@@ -53,6 +60,7 @@ export const useAuthStore = defineStore('auth', {
     clear() {
       this.user = null
       this.accountLabels = []
+      this.emailVerified = false
       this.loading = false
     }
   }

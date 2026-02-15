@@ -34,7 +34,11 @@ export default defineNuxtConfig({
     public: {
       appwriteEndpoint: 'https://cloud.appwrite.io/v1',
       appwriteProject: '',
-      stripePriceId: '',
+      stripeSoloQuarterlyPriceId: '',
+      stripeSoloYearlyPriceId: '',
+      stripeTeamQuarterlyPriceId: '',
+      stripeTeamYearlyPriceId: '',
+      stripeLifetimePriceId: '',
       appUrl: 'http://localhost:3000'
     }
   },

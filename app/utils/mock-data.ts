@@ -632,5 +632,7 @@ export const mockUser: UserProfile = {
   subscriptionStatus: 'free',
   stripeCustomerId: undefined,
   stripeSubscriptionId: undefined,
-  subscribedAt: undefined
+  subscribedAt: undefined,
+  teamId: undefined,
+  planType: undefined
 }

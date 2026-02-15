@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PricingPlanProps, ButtonProps } from '@nuxt/ui'
+import { PRICING } from '~/utils/constants'
 
 definePageMeta({
   layout: 'default'
@@ -7,21 +8,41 @@ definePageMeta({
 
 useSeoMeta({
   title: 'Pricing - The Vault',
-  description: 'Choose the plan that fits your workflow. Start free with essential resources, or unlock the full library with Pro.',
+  description: 'Choose the plan that fits your workflow. Solo, Team, or Lifetime — all in EUR.',
   ogTitle: 'Pricing - The Vault',
-  ogDescription: 'Choose the plan that fits your workflow. Start free or go Pro.'
+  ogDescription: 'Choose the plan that fits your workflow. Solo, Team, or Lifetime.'
 })
 
 const { isAuthenticated, isSubscribed } = useAuth()
 const { startCheckout, openPortal, checkoutLoading } = useSubscription()
+const config = useRuntimeConfig()
 
-function handleProClick() {
+// Billing toggle: quarterly vs yearly
+const isYearly = ref(false)
+
+function handleSoloClick() {
   if (!isAuthenticated.value) {
     navigateTo('/register')
   } else if (isSubscribed.value) {
     openPortal()
   } else {
-    startCheckout()
+    const priceId = isYearly.value
+      ? config.public.stripeSoloYearlyPriceId as string
+      : config.public.stripeSoloQuarterlyPriceId as string
+    startCheckout(priceId, 'subscription')
+  }
+}
+
+function handleTeamClick() {
+  if (!isAuthenticated.value) {
+    navigateTo('/register')
+  } else if (isSubscribed.value) {
+    openPortal()
+  } else {
+    const priceId = isYearly.value
+      ? config.public.stripeTeamYearlyPriceId as string
+      : config.public.stripeTeamQuarterlyPriceId as string
+    startCheckout(priceId, 'subscription')
   }
 }
 
@@ -31,105 +52,113 @@ function handleLifetimeClick() {
   } else if (isSubscribed.value) {
     openPortal()
   } else {
-    // Use default price ID for now – lifetime price can be configured separately
-    startCheckout()
+    startCheckout(config.public.stripeLifetimePriceId as string, 'payment')
   }
 }
 
-const plans = computed<PricingPlanProps[]>(() => [
-  {
-    title: 'Free',
-    description: 'Perfect for exploring and getting started.',
-    price: '$0',
-    billingCycle: '/forever',
-    features: [
-      'Access to free resources',
-      'Live previews',
-      'Copy-paste code snippets',
-      'Dark & light mode',
-      'Search across all resources',
-      'Community access'
-    ],
-    button: {
-      label: isAuthenticated.value ? 'Current Plan' : 'Get Started',
-      to: isAuthenticated.value ? '/vault' : '/register',
-      color: 'neutral',
-      variant: 'outline',
-      disabled: isAuthenticated.value && !isSubscribed.value
-    } as ButtonProps
-  },
-  {
-    title: 'Pro',
-    description: 'For serious builders who want the full library.',
-    price: '$19',
-    billingCycle: '/month',
-    billingPeriod: 'or $149/year (save 35%)',
-    badge: 'Most popular',
-    highlight: true,
-    scale: true,
-    features: [
-      'Everything in Free',
-      'Access to all premium resources',
-      'Early access to new additions',
-      'Priority support',
-      'Figma source files',
-      'Implementation documentation',
-      'Commercial license included'
-    ],
-    button: {
-      label: isSubscribed.value ? 'Manage Subscription' : 'Subscribe to Pro',
-      loading: checkoutLoading.value,
-      onClick: handleProClick
-    } as ButtonProps
-  },
-  {
-    title: 'Lifetime',
-    description: 'Pay once, own it forever.',
-    price: '$499',
-    tagline: 'One-time payment',
-    features: [
-      'Everything in Pro',
-      'Lifetime access to all resources',
-      'All future updates included',
-      'Priority support forever',
-      'Exclusive lifetime badge',
-      'Early access to new features'
-    ],
-    button: {
-      label: isSubscribed.value ? 'Manage Subscription' : 'Buy Lifetime',
-      color: 'neutral',
-      variant: 'subtle',
-      onClick: handleLifetimeClick
-    } as ButtonProps
-  }
-])
+const plans = computed<PricingPlanProps[]>(() => {
+  const solo = PRICING.SOLO
+  const team = PRICING.TEAM
+  const lifetime = PRICING.LIFETIME
+
+  const soloBilling = isYearly.value ? solo.yearly : solo.quarterly
+  const teamBilling = isYearly.value ? team.yearly : team.quarterly
+
+  return [
+    {
+      title: solo.name,
+      description: 'Full access for one developer.',
+      price: soloBilling.label,
+      billingCycle: isYearly.value ? '/year' : '/quarter',
+      billingPeriod: `${soloBilling.perMonth}/month`,
+      features: [
+        'Access to all resources',
+        'Live previews & code snippets',
+        'Figma source files',
+        'Implementation docs',
+        'Commercial license',
+        '1 seat'
+      ],
+      button: {
+        label: isSubscribed.value ? 'Manage Subscription' : 'Get Solo',
+        loading: checkoutLoading.value,
+        color: 'neutral',
+        variant: 'outline',
+        onClick: handleSoloClick
+      } as ButtonProps
+    },
+    {
+      title: team.name,
+      description: 'Perfect for small teams and agencies.',
+      price: teamBilling.label,
+      billingCycle: isYearly.value ? '/year' : '/quarter',
+      billingPeriod: `${teamBilling.perMonth}/month`,
+      badge: 'Best value',
+      highlight: true,
+      scale: true,
+      features: [
+        'Everything in Solo',
+        '2 team seats included',
+        'Invite team members',
+        'Shared access to all resources',
+        'Team management dashboard',
+        'Priority support'
+      ],
+      button: {
+        label: isSubscribed.value ? 'Manage Subscription' : 'Get Team',
+        loading: checkoutLoading.value,
+        onClick: handleTeamClick
+      } as ButtonProps
+    },
+    {
+      title: lifetime.name,
+      description: 'Pay once, use forever.',
+      price: lifetime.label,
+      tagline: 'One-time payment',
+      features: [
+        'Everything in Solo',
+        'Lifetime access to all resources',
+        'All future updates included',
+        'Priority support forever',
+        'Exclusive lifetime badge',
+        '1 seat'
+      ],
+      button: {
+        label: isSubscribed.value ? 'Manage Subscription' : 'Buy Lifetime',
+        color: 'neutral',
+        variant: 'subtle',
+        onClick: handleLifetimeClick
+      } as ButtonProps
+    }
+  ]
+})
 
 const faqItems = [
   {
-    question: 'Can I use the free resources in commercial projects?',
-    answer: 'Yes! All free resources come with a permissive license that allows commercial use.'
+    question: 'What is the difference between Solo and Team?',
+    answer: 'Solo gives full access to one developer. Team includes 2 seats so you can invite a colleague or collaborator to share access.'
   },
   {
-    question: 'What happens if I cancel my Pro subscription?',
-    answer: 'You\'ll keep access until the end of your billing period. After that, you\'ll revert to the Free plan and can still access free resources.'
+    question: 'Can I switch between quarterly and yearly billing?',
+    answer: 'Yes! You can switch plans at any time from your account settings. The remaining balance will be prorated.'
   },
   {
-    question: 'Can I upgrade from monthly to yearly?',
-    answer: 'Absolutely! You can switch plans at any time from your account settings. The remaining balance will be prorated.'
+    question: 'What does Lifetime include?',
+    answer: 'Lifetime gives you permanent access to all current and future resources with a single payment. No recurring fees ever.'
   },
   {
-    question: 'Do you offer team or enterprise plans?',
-    answer: 'Not yet, but we\'re working on it. Reach out to us if you\'re interested in a team plan.'
+    question: 'Can I add more team members?',
+    answer: 'The Team plan includes 2 seats. If you need more seats, please reach out and we can discuss a custom arrangement.'
   },
   {
     question: 'What payment methods do you accept?',
-    answer: 'We accept all major credit cards through Stripe. For Lifetime plans, we also support bank transfers.'
+    answer: 'We accept all major credit cards through Stripe. All prices are in EUR.'
   }
 ]
 
 const ctaLinks: ButtonProps[] = [
   {
-    label: 'Get Started for Free',
+    label: 'Get Started',
     to: '/register',
     trailingIcon: 'i-lucide-arrow-right',
     color: 'neutral'
@@ -143,11 +172,45 @@ const ctaLinks: ButtonProps[] = [
     <UPageHero
       headline="Pricing"
       title="Choose the plan that fits your workflow"
-      description="Start free with essential resources, or unlock the full library with Pro. No hidden fees, cancel anytime."
+      description="All plans include full access to every resource. Solo for individuals, Team for collaboration, Lifetime for forever."
       :ui="{
         root: 'py-16 sm:py-24'
       }"
     />
+
+    <!-- Billing toggle -->
+    <UPageSection
+      :ui="{
+        root: 'pt-0 pb-4'
+      }"
+    >
+      <div class="flex items-center justify-center gap-3">
+        <span
+          class="text-sm font-medium"
+          :class="!isYearly ? 'text-primary' : 'text-muted'"
+        >
+          Quarterly
+        </span>
+        <USwitch
+          v-model="isYearly"
+          size="lg"
+        />
+        <span
+          class="text-sm font-medium"
+          :class="isYearly ? 'text-primary' : 'text-muted'"
+        >
+          Yearly
+        </span>
+        <UBadge
+          v-if="isYearly"
+          color="primary"
+          variant="subtle"
+          size="sm"
+        >
+          Save ~20%
+        </UBadge>
+      </div>
+    </UPageSection>
 
     <!-- Pricing Plans -->
     <UPageSection
@@ -194,7 +257,7 @@ const ctaLinks: ButtonProps[] = [
     >
       <UPageCTA
         title="Start building faster today"
-        description="Join The Vault for free and explore production-ready components, animations, and code snippets."
+        description="Join The Vault and explore production-ready components, animations, and code snippets."
         variant="subtle"
         :links="ctaLinks"
         class="rounded-none sm:rounded-xl"

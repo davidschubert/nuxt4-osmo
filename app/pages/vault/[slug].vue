@@ -8,7 +8,7 @@ definePageMeta({
 
 const route = useRoute()
 const { getResourceBySlug, getRelatedResources, getResourceCode, loading } = useResources()
-const { isSubscribed } = useAuth()
+const { isSubscribed, emailVerified } = useAuth()
 const { categoriesWithCount } = useCategories()
 
 const slug = computed(() => route.params.slug as string)
@@ -27,7 +27,11 @@ const relatedResources = computed(() => {
 
 const isLocked = computed(() => {
   if (!resource.value) return false
-  return !resource.value.isFree && !isSubscribed.value
+  // Premium resources are locked if not subscribed OR email not verified
+  if (!resource.value.isFree) {
+    return !isSubscribed.value || !emailVerified.value
+  }
+  return false
 })
 
 // Load code separately from the resource-code collection
@@ -75,7 +79,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="p-4 sm:p-6">
+  <div>
     <!-- Loading state -->
     <div
       v-if="loading"

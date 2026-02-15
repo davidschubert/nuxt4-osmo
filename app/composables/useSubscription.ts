@@ -15,8 +15,11 @@ export function useSubscription() {
    * Start Stripe Checkout flow.
    * Redirects the browser to Stripe's hosted checkout page.
    * In mock mode, immediately upgrades the user to active.
+   *
+   * @param priceId - Stripe Price ID to checkout
+   * @param mode - Checkout mode: 'subscription' for recurring, 'payment' for one-time (Lifetime)
    */
-  async function startCheckout(priceId?: string) {
+  async function startCheckout(priceId?: string, mode: 'subscription' | 'payment' = 'subscription') {
     const user = authStore.user
     if (!user) {
       toast.add({
@@ -36,8 +39,9 @@ export function useSubscription() {
         ...user,
         subscriptionStatus: 'active',
         stripeCustomerId: 'cus_mock_123',
-        stripeSubscriptionId: 'sub_mock_123',
-        subscribedAt: new Date().toISOString()
+        stripeSubscriptionId: mode === 'subscription' ? 'sub_mock_123' : undefined,
+        subscribedAt: new Date().toISOString(),
+        planType: mode === 'payment' ? 'lifetime' : 'solo'
       })
       if (import.meta.client) {
         localStorage.setItem('vault-mock-session', JSON.stringify(authStore.user))
@@ -45,7 +49,7 @@ export function useSubscription() {
       checkoutLoading.value = false
       toast.add({
         title: 'Subscribed!',
-        description: 'Mock checkout complete. You now have Pro access.'
+        description: 'Mock checkout complete. You now have full access.'
       })
       await navigateTo('/checkout/success')
       return
@@ -58,7 +62,8 @@ export function useSubscription() {
         body: {
           userId: user.userId,
           userEmail: user.email,
-          priceId
+          priceId,
+          checkoutMode: mode
         }
       })
 
@@ -138,7 +143,9 @@ export function useSubscription() {
         subscriptionStatus: (profile.subscriptionStatus as typeof user.subscriptionStatus) || 'free',
         stripeCustomerId: (profile.stripeCustomerId as string) || undefined,
         stripeSubscriptionId: (profile.stripeSubscriptionId as string) || undefined,
-        subscribedAt: (profile.subscribedAt as string) || undefined
+        subscribedAt: (profile.subscribedAt as string) || undefined,
+        planType: (profile.planType as typeof user.planType) || undefined,
+        teamId: (profile.teamId as string) || undefined
       })
     } catch (error) {
       console.error('Failed to refresh subscription status:', error)
@@ -158,7 +165,8 @@ export function useSubscription() {
       ...user,
       subscriptionStatus: 'free',
       stripeSubscriptionId: undefined,
-      subscribedAt: undefined
+      subscribedAt: undefined,
+      planType: undefined
     })
     if (import.meta.client) {
       localStorage.setItem('vault-mock-session', JSON.stringify(authStore.user))

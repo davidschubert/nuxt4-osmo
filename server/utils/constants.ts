@@ -5,6 +5,7 @@
 export const APPWRITE_DB = {
   DATABASE_ID: 'vault-db',
   COLLECTIONS: {
-    USER_PROFILES: 'user-profiles'
+    USER_PROFILES: 'user-profiles',
+    TEAMS: 'teams'
   }
 } as const

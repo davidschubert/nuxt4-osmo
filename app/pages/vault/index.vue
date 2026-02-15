@@ -53,7 +53,7 @@ function clearCategory() {
 </script>
 
 <template>
-  <div class="p-4 sm:p-6">
+  <div>
     <!-- Category view: breadcrumb + title -->
     <div v-if="activeCategory">
       <UBreadcrumb

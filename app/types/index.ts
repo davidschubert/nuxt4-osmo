@@ -1,6 +1,9 @@
 // Subscription status for user profiles
 export type SubscriptionStatus = 'free' | 'active' | 'canceled' | 'past_due'
 
+// Plan type for pricing tiers
+export type PlanType = 'solo' | 'team' | 'lifetime'
+
 // Resource represents a single vault entry (metadata only, code lives in ResourceCode)
 export interface Resource {
   $id: string
@@ -60,6 +63,20 @@ export interface UserProfile {
   stripeCustomerId?: string
   stripeSubscriptionId?: string
   subscribedAt?: string
+  teamId?: string
+  planType?: PlanType
+}
+
+// Team for multi-user subscriptions
+export interface Team {
+  $id: string
+  name: string
+  ownerId: string
+  memberIds: string[]
+  subscriptionStatus: SubscriptionStatus
+  stripeCustomerId?: string
+  stripeSubscriptionId?: string
+  planType: 'team'
 }
 
 // Navigation item for sidebar menu
