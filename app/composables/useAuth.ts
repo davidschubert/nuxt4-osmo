@@ -236,8 +236,10 @@ export function useAuth() {
 
         // Send email verification
         try {
+          const config = useRuntimeConfig()
+          const appUrl = config.public.appUrl as string
           await account.createVerification({
-            url: `${window.location.origin}/verify-email`
+            url: `${appUrl}/verify-email`
           })
         } catch (err) {
           console.error('[register] Failed to send verification email:', err)
@@ -265,8 +267,10 @@ export function useAuth() {
     if (MOCK_MODE) return
     try {
       const { account } = useAppwrite()
+      const config = useRuntimeConfig()
+      const appUrl = config.public.appUrl as string
       await account.createVerification({
-        url: `${window.location.origin}/verify-email`
+        url: `${appUrl}/verify-email`
       })
       toast.add({
         title: 'Verification email sent!',
@@ -333,10 +337,12 @@ export function useAuth() {
           google: OAuthProvider.Google
         }
         // OAuth redirects the browser – this call does not return
+        const config = useRuntimeConfig()
+        const appUrl = config.public.appUrl as string
         account.createOAuth2Session({
           provider: providerMap[provider] as string,
-          success: `${window.location.origin}/vault`,
-          failure: `${window.location.origin}/login`
+          success: `${appUrl}/vault`,
+          failure: `${appUrl}/login`
         })
       }
     } catch (error: unknown) {

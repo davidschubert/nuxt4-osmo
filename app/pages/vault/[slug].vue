@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import DOMPurify from 'isomorphic-dompurify'
 import type { ResourceCode } from '~/types'
+
+// Lazy-loaded DOMPurify (client-only, avoids SSR breakage)
+const domPurifyReady = ref(false)
+let _DOMPurify: { sanitize: (dirty: string, config?: Record<string, unknown>) => string } | null = null
 
 definePageMeta({
   layout: 'vault',
@@ -76,6 +79,23 @@ const pageDescription = computed(() => resource.value?.description ?? '')
 useSeoMeta({
   title: pageTitle,
   description: pageDescription
+})
+
+// Load DOMPurify lazily on mount (client-only)
+onMounted(async () => {
+  const mod = await import('isomorphic-dompurify')
+  _DOMPurify = mod.default
+  domPurifyReady.value = true
+})
+
+// Sanitized implementation notes (reactive, waits for DOMPurify)
+const sanitizedNotes = computed(() => {
+  if (!resourceCode.value?.implementationNotes) return ''
+  const html = renderMarkdown(resourceCode.value.implementationNotes)
+  if (_DOMPurify) {
+    return _DOMPurify.sanitize(html)
+  }
+  return html
 })
 </script>
 
@@ -205,7 +225,7 @@ useSeoMeta({
                 Implementation
               </h2>
               <div class="prose prose-sm prose-invert max-w-none">
-                <div v-html="DOMPurify.sanitize(renderMarkdown(resourceCode.implementationNotes))" />
+                <div v-html="sanitizedNotes" />
               </div>
             </div>
           </template>

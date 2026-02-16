@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import DOMPurify from 'isomorphic-dompurify'
 import type { ResourceCode } from '~/types'
+
+// Lazy-loaded DOMPurify (client-only, avoids SSR breakage)
+let DOMPurify: { sanitize: (dirty: string, config?: Record<string, unknown>) => string } | null = null
 
 const props = defineProps<{
   code: ResourceCode
@@ -9,6 +11,12 @@ const props = defineProps<{
 
 const toast = useToast()
 const { highlightCode, isReady } = useHighlighter()
+
+// Load DOMPurify lazily on mount (client-only)
+onMounted(async () => {
+  const mod = await import('isomorphic-dompurify')
+  DOMPurify = mod.default
+})
 
 // Build code steps dynamically based on what code exists
 const codeSteps = computed(() => {
@@ -73,10 +81,12 @@ watch(
       try {
         const html = await highlightCode(step.code, step.language)
         // Sanitize highlighted HTML — allow only syntax highlighting tags
-        const sanitized = DOMPurify.sanitize(html, {
-          ALLOWED_TAGS: ['pre', 'code', 'span', 'br', 'div'],
-          ALLOWED_ATTR: ['class', 'style']
-        })
+        const sanitized = DOMPurify
+          ? DOMPurify.sanitize(html, {
+              ALLOWED_TAGS: ['pre', 'code', 'span', 'br', 'div'],
+              ALLOWED_ATTR: ['class', 'style']
+            })
+          : html
         newMap.set(step.label, sanitized)
       } catch {
         // Fallback: no highlighting

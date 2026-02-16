@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { APP } from '~/utils/constants'
 
-// Initialize auth state on app startup
+// Initialize auth state on app startup (client-only)
 const { init: initAuth } = useAuth()
 onMounted(async () => {
+  // Load the Appwrite SDK lazily (browser-only, SSR-safe)
+  await initAppwriteSdk()
+
   // Ping Appwrite to verify connection (required for initial setup)
   try {
     const { client } = useAppwrite()

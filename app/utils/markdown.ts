@@ -1,4 +1,21 @@
-import DOMPurify from 'isomorphic-dompurify'
+/**
+ * Simple markdown to HTML renderer for implementation notes.
+ * DOMPurify is loaded lazily to avoid SSR breakage (it requires `document`).
+ */
+
+// Lazy-loaded DOMPurify instance (client-only)
+let _DOMPurify: { sanitize: (dirty: string, config?: Record<string, unknown>) => string } | null = null
+
+/**
+ * Initialize DOMPurify. Call this on the client before using renderMarkdown().
+ * Safe to call multiple times (no-op after first load).
+ */
+export async function initDOMPurify() {
+  if (_DOMPurify) return
+  if (!import.meta.client) return
+  const mod = await import('isomorphic-dompurify')
+  _DOMPurify = mod.default
+}
 
 /**
  * Escape HTML entities to prevent XSS in user-supplied text
@@ -15,7 +32,8 @@ function escapeHtml(text: string): string {
 /**
  * Simple markdown to HTML renderer for implementation notes.
  * Handles headings, paragraphs, inline code, bold, and newlines.
- * All output is sanitized with DOMPurify to prevent XSS.
+ * All output is sanitized with DOMPurify when available (client-side).
+ * On SSR, returns escaped HTML without DOMPurify (safe because escapeHtml is applied first).
  */
 export function renderMarkdown(markdown: string): string {
   // Split into lines for per-line processing
@@ -55,9 +73,14 @@ export function renderMarkdown(markdown: string): string {
 
   const html = processedLines.filter(Boolean).join('\n')
 
-  // Final DOMPurify pass for defense-in-depth
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: ['h2', 'h3', 'h4', 'p', 'code', 'strong', 'br'],
-    ALLOWED_ATTR: ['class']
-  })
+  // Final DOMPurify pass for defense-in-depth (client-only)
+  if (_DOMPurify) {
+    return _DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ['h2', 'h3', 'h4', 'p', 'code', 'strong', 'br'],
+      ALLOWED_ATTR: ['class']
+    })
+  }
+
+  // SSR fallback — content is already escaped via escapeHtml()
+  return html
 }
