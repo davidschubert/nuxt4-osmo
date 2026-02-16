@@ -7,6 +7,8 @@ interface VaultState {
   loading: boolean
   searchQuery: string
   activeCategory: string | null
+  resourcesLoadedAt: number | null
+  categoriesLoadedAt: number | null
 }
 
 export const useVaultStore = defineStore('vault', {
@@ -15,7 +17,9 @@ export const useVaultStore = defineStore('vault', {
     categories: [],
     loading: false,
     searchQuery: '',
-    activeCategory: null
+    activeCategory: null,
+    resourcesLoadedAt: null,
+    categoriesLoadedAt: null
   }),
 
   getters: {

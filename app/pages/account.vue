@@ -231,10 +231,12 @@ async function submitPassword() {
               </p>
               <UButton
                 variant="link"
-                color="primary"
+                color="neutral"
                 size="xs"
+                disabled
+                class="opacity-50"
               >
-                Change address
+                Change address (Coming soon)
               </UButton>
             </div>
 
@@ -247,10 +249,12 @@ async function submitPassword() {
               </p>
               <UButton
                 variant="link"
-                color="primary"
+                color="neutral"
                 size="xs"
+                disabled
+                class="opacity-50"
               >
-                Change organization
+                Change organization (Coming soon)
               </UButton>
             </div>
           </div>

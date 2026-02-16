@@ -8,7 +8,7 @@ export default defineNuxtConfig({
     '@pinia/nuxt'
   ],
 
-  ssr: false,
+  ssr: true,
 
   devtools: {
     enabled: true
@@ -45,7 +45,15 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/': { prerender: true },
-    '/plans': { prerender: true }
+    '/plans': { prerender: true },
+    '/login': { ssr: true },
+    '/register': { ssr: true },
+    '/vault/**': { ssr: false },
+    '/admin/**': { ssr: false },
+    '/account': { ssr: false },
+    '/checkout/**': { ssr: false },
+    '/invite': { ssr: false },
+    '/verify-email': { ssr: false }
   },
 
   compatibilityDate: '2025-01-15',

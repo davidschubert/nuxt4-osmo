@@ -25,7 +25,27 @@ export default defineEventHandler(async (event) => {
   const stripe = useStripe()
   const { databases } = useAppwriteAdmin()
   const config = useRuntimeConfig()
-  const mode = body.checkoutMode || 'subscription'
+
+  // Validate priceId against known price IDs from config
+  const allowedPriceIds = [
+    config.public.stripeSoloQuarterlyPriceId,
+    config.public.stripeSoloYearlyPriceId,
+    config.public.stripeTeamQuarterlyPriceId,
+    config.public.stripeTeamYearlyPriceId,
+    config.public.stripeLifetimePriceId
+  ].filter(Boolean) as string[]
+
+  if (!allowedPriceIds.includes(body.priceId)) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Invalid price ID'
+    })
+  }
+
+  // Auto-determine checkout mode: lifetime = one-time payment, others = subscription
+  const mode = body.priceId === config.public.stripeLifetimePriceId
+    ? 'payment' as const
+    : (body.checkoutMode || 'subscription')
 
   // Check if user already has a Stripe customer ID
   let stripeCustomerId: string | undefined

@@ -2,15 +2,24 @@ import { mockCategories } from '~/utils/mock-data'
 import type { Category } from '~/types'
 import { APPWRITE } from '~/utils/constants'
 
+/** Cache TTL: 5 minutes */
+const CACHE_TTL = 5 * 60 * 1000
+
 export function useCategories() {
   const vaultStore = useVaultStore()
   const MOCK_MODE = isMockMode()
 
   /**
-   * Load all categories from Appwrite or mock data
+   * Load all categories from Appwrite or mock data.
+   * Uses TTL-based caching to avoid unnecessary re-fetching.
    */
-  async function loadCategories() {
-    if (vaultStore.categories.length > 0) return
+  async function loadCategories(force = false) {
+    const now = Date.now()
+    const isStale = !vaultStore.categoriesLoadedAt
+      || (now - vaultStore.categoriesLoadedAt) > CACHE_TTL
+
+    // Skip if data is fresh and not forced
+    if (!force && vaultStore.categories.length > 0 && !isStale) return
 
     vaultStore.setLoading(true)
     try {
@@ -26,6 +35,7 @@ export function useCategories() {
         })
         vaultStore.setCategories(result.documents as unknown as Category[])
       }
+      vaultStore.categoriesLoadedAt = Date.now()
     } catch (error) {
       console.error('Failed to load categories:', error)
       const toast = useToast()

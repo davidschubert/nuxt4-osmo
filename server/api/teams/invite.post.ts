@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const { databases, Query } = useAppwriteAdmin()
+  const { databases } = useAppwriteAdmin()
   const config = useRuntimeConfig()
 
   // Verify the inviter is the team owner
@@ -39,29 +39,20 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Check if the invited user already exists
-  const existingUsers = await databases.listDocuments(
-    APPWRITE_DB.DATABASE_ID,
-    APPWRITE_DB.COLLECTIONS.USER_PROFILES,
-    [Query.equal('email', body.email), Query.limit(1)]
-  )
-
   const appUrl = config.public.appUrl as string || 'http://localhost:3000'
   const inviteToken = crypto.randomUUID()
-  const inviteUrl = `${appUrl}/invite?token=${inviteToken}&teamId=${body.teamId}`
+
+  // Token expires in 7 days
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+  const inviteUrl = `${appUrl}/invite?token=${inviteToken}&teamId=${body.teamId}&expires=${expiresAt}`
 
   // In a production app, you would send an email here via Appwrite Messaging
   // or a third-party email service. For now, we return the invite URL.
-  console.log(`Team invite sent to ${body.email}: ${inviteUrl}`)
-
-  // If user already exists, we could auto-add them, but for security
-  // we always send an invite link so the user explicitly accepts
-  const isExistingUser = (existingUsers.documents?.length ?? 0) > 0
+  console.log(`Team invite created for ${body.email} (expires: ${expiresAt})`)
 
   return {
     success: true,
     inviteUrl,
-    isExistingUser,
-    message: `Invitation sent to ${body.email}`
+    message: 'Invitation sent to the provided email'
   }
 })

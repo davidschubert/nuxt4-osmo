@@ -2,15 +2,24 @@ import { mockResources, mockResourceCodes } from '~/utils/mock-data'
 import type { Resource, ResourceCode } from '~/types'
 import { APPWRITE } from '~/utils/constants'
 
+/** Cache TTL: 5 minutes */
+const CACHE_TTL = 5 * 60 * 1000
+
 export function useResources() {
   const vaultStore = useVaultStore()
   const MOCK_MODE = isMockMode()
 
   /**
-   * Load all resources from Appwrite or mock data
+   * Load all resources from Appwrite or mock data.
+   * Uses TTL-based caching and cursor pagination for >100 resources.
    */
-  async function loadResources() {
-    if (vaultStore.resources.length > 0) return
+  async function loadResources(force = false) {
+    const now = Date.now()
+    const isStale = !vaultStore.resourcesLoadedAt
+      || (now - vaultStore.resourcesLoadedAt) > CACHE_TTL
+
+    // Skip if data is fresh and not forced
+    if (!force && vaultStore.resources.length > 0 && !isStale) return
 
     vaultStore.setLoading(true)
     try {
@@ -19,20 +28,39 @@ export function useResources() {
         vaultStore.setResources(mockResources)
       } else {
         const { databases, Query } = useAppwrite()
-        const result = await databases.listDocuments({
-          databaseId: APPWRITE.DATABASE_ID,
-          collectionId: APPWRITE.COLLECTIONS.RESOURCES,
-          queries: [Query.orderAsc('sortOrder'), Query.limit(100)]
-        })
-        // Map documents and resolve thumbnail URLs
-        const resources = (result.documents as unknown as Resource[]).map(doc => ({
-          ...doc,
-          thumbnailUrl: doc.thumbnailFileId
-            ? getFilePreviewUrl(doc.thumbnailFileId)
-            : undefined
-        }))
-        vaultStore.setResources(resources)
+
+        // Cursor-based pagination to fetch all resources
+        let allDocs: Resource[] = []
+        let lastId: string | undefined
+        let hasMore = true
+
+        while (hasMore) {
+          const queries = [Query.orderAsc('sortOrder'), Query.limit(100)]
+          if (lastId) queries.push(Query.cursorAfter(lastId))
+
+          const result = await databases.listDocuments({
+            databaseId: APPWRITE.DATABASE_ID,
+            collectionId: APPWRITE.COLLECTIONS.RESOURCES,
+            queries
+          })
+
+          const docs = (result.documents as unknown as Resource[]).map(doc => ({
+            ...doc,
+            thumbnailUrl: doc.thumbnailFileId
+              ? getFilePreviewUrl(doc.thumbnailFileId)
+              : undefined
+          }))
+
+          allDocs = allDocs.concat(docs)
+          hasMore = result.documents.length === 100
+          if (result.documents.length > 0) {
+            lastId = result.documents[result.documents.length - 1].$id
+          }
+        }
+
+        vaultStore.setResources(allDocs)
       }
+      vaultStore.resourcesLoadedAt = Date.now()
     } catch (error) {
       console.error('Failed to load resources:', error)
       const toast = useToast()

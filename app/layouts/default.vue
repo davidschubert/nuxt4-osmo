@@ -8,25 +8,25 @@ const footerLinks = [
   {
     label: 'Product',
     children: [
-      { label: 'Features', to: '/#features' },
-      { label: 'Plans', to: '/plans' },
-      { label: 'Changelog', to: '#' }
+      { label: 'Features', to: '/#features', disabled: false },
+      { label: 'Plans', to: '/plans', disabled: false },
+      { label: 'Changelog', to: '#', disabled: true }
     ]
   },
   {
     label: 'Resources',
     children: [
-      { label: 'Documentation', to: '#' },
-      { label: 'Community', to: '#' },
-      { label: 'Support', to: '#' }
+      { label: 'Documentation', to: '#', disabled: true },
+      { label: 'Community', to: '#', disabled: true },
+      { label: 'Support', to: '#', disabled: true }
     ]
   },
   {
     label: 'Legal',
     children: [
-      { label: 'Privacy Policy', to: '#' },
-      { label: 'Terms of Service', to: '#' },
-      { label: 'License', to: '#' }
+      { label: 'Privacy Policy', to: '#', disabled: true },
+      { label: 'Terms of Service', to: '#', disabled: true },
+      { label: 'License', to: '#', disabled: true }
     ]
   }
 ]
@@ -111,11 +111,19 @@ const footerLinks = [
                 :key="link.label"
               >
                 <NuxtLink
+                  v-if="!link.disabled"
                   :to="link.to"
                   class="text-sm text-muted hover:text-default transition-colors"
                 >
                   {{ link.label }}
                 </NuxtLink>
+                <span
+                  v-else
+                  class="text-sm text-muted/50 cursor-default"
+                  title="Coming soon"
+                >
+                  {{ link.label }}
+                </span>
               </li>
             </ul>
           </div>

@@ -14,17 +14,40 @@ interface RegisterParams {
 }
 
 /**
+ * Typed Appwrite user object matching the Account.get() response
+ */
+interface AppwriteUser {
+  $id: string
+  email: string
+  name: string
+  emailVerification: boolean
+  labels: string[]
+}
+
+/**
+ * Appwrite error shape (AppwriteException)
+ */
+interface AppwriteError {
+  code: number
+  message: string
+}
+
+function isAppwriteError(err: unknown): err is AppwriteError {
+  return typeof err === 'object' && err !== null && 'code' in err && 'message' in err
+}
+
+/**
  * Map Appwrite user + optional profile document to our UserProfile interface
  */
 function mapAppwriteUser(
-  user: Record<string, unknown>,
+  user: AppwriteUser,
   profile?: Record<string, unknown> | null
 ): UserProfile {
   return {
-    $id: (profile?.$id as string) || (user.$id as string),
-    userId: user.$id as string,
-    displayName: (user.name as string) || (user.email as string)?.split('@')[0] || 'User',
-    email: user.email as string,
+    $id: (profile?.$id as string) || user.$id,
+    userId: user.$id,
+    displayName: user.name || user.email?.split('@')[0] || 'User',
+    email: user.email,
     avatarUrl: (profile?.avatarUrl as string) || undefined,
     subscriptionStatus: (profile?.subscriptionStatus as UserProfile['subscriptionStatus']) || 'free',
     stripeCustomerId: (profile?.stripeCustomerId as string) || undefined,
@@ -38,18 +61,19 @@ function mapAppwriteUser(
 /**
  * Ensure a user-profiles document exists for the given user.
  * Creates one if it doesn't exist (e.g. first OAuth login).
+ * Handles 409 Conflict from concurrent profile creation (race condition).
  */
 async function ensureProfile(
   databases: ReturnType<typeof useAppwrite>['databases'],
   Permission: ReturnType<typeof useAppwrite>['Permission'],
   Role: ReturnType<typeof useAppwrite>['Role'],
-  user: Record<string, unknown>
+  user: AppwriteUser
 ): Promise<Record<string, unknown> | null> {
   try {
     return await databases.getDocument({
       databaseId: APPWRITE.DATABASE_ID,
       collectionId: APPWRITE.COLLECTIONS.USER_PROFILES,
-      documentId: user.$id as string
+      documentId: user.$id
     })
   } catch {
     // Profile doesn't exist — create it (first login / first OAuth)
@@ -57,19 +81,31 @@ async function ensureProfile(
       return await databases.createDocument({
         databaseId: APPWRITE.DATABASE_ID,
         collectionId: APPWRITE.COLLECTIONS.USER_PROFILES,
-        documentId: user.$id as string,
+        documentId: user.$id,
         data: {
-          userId: user.$id as string,
-          displayName: (user.name as string) || (user.email as string)?.split('@')[0] || 'User',
+          userId: user.$id,
+          displayName: user.name || user.email?.split('@')[0] || 'User',
           subscriptionStatus: 'free'
         },
         permissions: [
-          Permission.read(Role.user(user.$id as string)),
-          Permission.update(Role.user(user.$id as string))
+          Permission.read(Role.user(user.$id)),
+          Permission.update(Role.user(user.$id))
         ]
       })
-    } catch (err) {
-      console.error('[ensureProfile] Failed to create user profile:', err)
+    } catch (createErr: unknown) {
+      // 409 = document already created by a concurrent request (race condition)
+      if (isAppwriteError(createErr) && createErr.code === 409) {
+        try {
+          return await databases.getDocument({
+            databaseId: APPWRITE.DATABASE_ID,
+            collectionId: APPWRITE.COLLECTIONS.USER_PROFILES,
+            documentId: user.$id
+          })
+        } catch {
+          // Fall through to return null
+        }
+      }
+      console.error('[ensureProfile] Failed to create user profile:', createErr)
       return null
     }
   }
@@ -99,20 +135,14 @@ export function useAuth() {
         }
       } else {
         const { account, databases, Permission, Role } = useAppwrite()
-        const user = await account.get()
+        const rawUser = await account.get()
+        const user = rawUser as unknown as AppwriteUser
         // Set email verification status from Appwrite account
-        authStore.setEmailVerified(
-          (user as unknown as Record<string, boolean>).emailVerification ?? false
-        )
+        authStore.setEmailVerified(user.emailVerification ?? false)
         // Ensure profile exists (creates on first OAuth login)
-        const profile = await ensureProfile(
-          databases,
-          Permission,
-          Role,
-          user as unknown as Record<string, unknown>
-        )
-        authStore.setAccountLabels((user as unknown as Record<string, string[]>).labels ?? [])
-        authStore.setUser(mapAppwriteUser(user as unknown as Record<string, unknown>, profile))
+        const profile = await ensureProfile(databases, Permission, Role, user)
+        authStore.setAccountLabels(user.labels ?? [])
+        authStore.setUser(mapAppwriteUser(user, profile))
       }
     } catch {
       authStore.setUser(null)
@@ -147,18 +177,12 @@ export function useAuth() {
       } else {
         const { account, databases, Permission, Role } = useAppwrite()
         await account.createEmailPasswordSession({ email, password })
-        const user = await account.get()
-        authStore.setEmailVerified(
-          (user as unknown as Record<string, boolean>).emailVerification ?? false
-        )
-        authStore.setAccountLabels((user as unknown as Record<string, string[]>).labels ?? [])
-        const profile = await ensureProfile(
-          databases,
-          Permission,
-          Role,
-          user as unknown as Record<string, unknown>
-        )
-        authStore.setUser(mapAppwriteUser(user as unknown as Record<string, unknown>, profile))
+        const rawUser = await account.get()
+        const user = rawUser as unknown as AppwriteUser
+        authStore.setEmailVerified(user.emailVerification ?? false)
+        authStore.setAccountLabels(user.labels ?? [])
+        const profile = await ensureProfile(databases, Permission, Role, user)
+        authStore.setUser(mapAppwriteUser(user, profile))
       }
 
       toast.add({ title: 'Welcome back!', description: 'You have been logged in successfully.' })
@@ -202,17 +226,13 @@ export function useAuth() {
         await account.create({ userId: ID.unique(), email, password, name })
         // Auto-login after registration
         await account.createEmailPasswordSession({ email, password })
-        const user = await account.get()
+        const rawUser = await account.get()
+        const user = rawUser as unknown as AppwriteUser
         authStore.setEmailVerified(false) // New user, not yet verified
-        authStore.setAccountLabels((user as unknown as Record<string, string[]>).labels ?? [])
+        authStore.setAccountLabels(user.labels ?? [])
         // Create user profile document
-        const profile = await ensureProfile(
-          databases,
-          Permission,
-          Role,
-          user as unknown as Record<string, unknown>
-        )
-        authStore.setUser(mapAppwriteUser(user as unknown as Record<string, unknown>, profile))
+        const profile = await ensureProfile(databases, Permission, Role, user)
+        authStore.setUser(mapAppwriteUser(user, profile))
 
         // Send email verification
         try {

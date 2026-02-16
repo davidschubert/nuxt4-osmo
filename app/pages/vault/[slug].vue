@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DOMPurify from 'isomorphic-dompurify'
 import type { ResourceCode } from '~/types'
 
 definePageMeta({
@@ -204,7 +205,7 @@ useSeoMeta({
                 Implementation
               </h2>
               <div class="prose prose-sm prose-invert max-w-none">
-                <div v-html="renderMarkdown(resourceCode.implementationNotes)" />
+                <div v-html="DOMPurify.sanitize(renderMarkdown(resourceCode.implementationNotes))" />
               </div>
             </div>
           </template>

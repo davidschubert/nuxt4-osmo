@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DOMPurify from 'isomorphic-dompurify'
 import type { ResourceCode } from '~/types'
 
 const props = defineProps<{
@@ -71,7 +72,12 @@ watch(
     for (const step of codeSteps.value) {
       try {
         const html = await highlightCode(step.code, step.language)
-        newMap.set(step.label, html)
+        // Sanitize highlighted HTML — allow only syntax highlighting tags
+        const sanitized = DOMPurify.sanitize(html, {
+          ALLOWED_TAGS: ['pre', 'code', 'span', 'br', 'div'],
+          ALLOWED_ATTR: ['class', 'style']
+        })
+        newMap.set(step.label, sanitized)
       } catch {
         // Fallback: no highlighting
       }

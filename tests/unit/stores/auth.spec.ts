@@ -105,7 +105,7 @@ describe('useAuthStore', () => {
     expect(store.displayName).toBe('David Schubert')
   })
 
-  it('clear resets user and labels but preserves initialized', () => {
+  it('clear resets all state including initialized', () => {
     const store = useAuthStore()
     store.setUser(mockUser)
     store.setAccountLabels(['admin'])
@@ -117,7 +117,7 @@ describe('useAuthStore', () => {
     expect(store.user).toBeNull()
     expect(store.accountLabels).toEqual([])
     expect(store.loading).toBe(false)
-    expect(store.initialized).toBe(true) // preserved
+    expect(store.initialized).toBe(false) // reset so init() runs again on next login
   })
 
   it('setInitialized marks store as initialized', () => {

@@ -62,6 +62,7 @@ export const useAuthStore = defineStore('auth', {
       this.accountLabels = []
       this.emailVerified = false
       this.loading = false
+      this.initialized = false
     }
   }
 })
