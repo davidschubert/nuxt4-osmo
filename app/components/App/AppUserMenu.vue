@@ -78,7 +78,7 @@ const menuItems = computed(() => [
     :ui="{ content: 'w-56' }"
   >
     <button
-      class="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-left hover:bg-elevated/50 transition-colors cursor-pointer"
+      class="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left hover:bg-elevated/50 transition-colors cursor-pointer"
     >
       <UAvatar
         size="sm"

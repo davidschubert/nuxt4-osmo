@@ -8,8 +8,8 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Register - The Vault',
-  description: 'Create your free Vault account and start exploring resources.'
+  title: 'Try - OSMO',
+  description: 'Create your free OSMO account and start exploring resources.'
 })
 
 const route = useRoute()
@@ -114,7 +114,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
           />
         </div>
         <p class="text-xs text-muted">
-          You can use the Vault right away — verify your email to unlock premium resources.
+          You can use OSMO right away — verify your email to unlock premium resources.
         </p>
       </div>
     </UPageCard>
@@ -130,7 +130,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
         :providers="providers"
         :loading="loading"
         title="Create your account"
-        description="Start exploring The Vault for free."
+        description="Start exploring OSMO for free."
         icon="i-lucide-user-plus"
         :submit="{ label: 'Create account' }"
         @submit="onSubmit"

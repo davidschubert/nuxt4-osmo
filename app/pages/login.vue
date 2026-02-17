@@ -8,7 +8,7 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Login - The Vault',
+  title: 'Login - OSMO',
   description: 'Sign in to your Vault account to access your resources.'
 })
 
@@ -78,7 +78,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
       >
         <template #description>
           Don't have an account? <NuxtLink
-            to="/register"
+            to="/try"
             class="text-primary font-medium"
           >
             Sign up

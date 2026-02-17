@@ -7,9 +7,9 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Plans - The Vault',
+  title: 'Plans - OSMO',
   description: 'Choose the plan that fits your workflow. Member, Lifetime, or Team — all in EUR.',
-  ogTitle: 'Plans - The Vault',
+  ogTitle: 'Plans - OSMO',
   ogDescription: 'Choose the plan that fits your workflow. Member, Lifetime, or Team.'
 })
 
@@ -31,7 +31,7 @@ const isYearly = ref(false)
 // --- CTA Handlers ---
 function handleMemberClick() {
   if (!isAuthenticated.value) {
-    navigateTo('/register')
+    navigateTo('/try')
   } else if (isSubscribed.value) {
     openPortal()
   } else {
@@ -44,7 +44,7 @@ function handleMemberClick() {
 
 function handleLifetimeClick() {
   if (!isAuthenticated.value) {
-    navigateTo('/register')
+    navigateTo('/try')
   } else if (isSubscribed.value) {
     openPortal()
   } else {
@@ -54,7 +54,7 @@ function handleLifetimeClick() {
 
 function handleTeamClick() {
   if (!isAuthenticated.value) {
-    navigateTo('/register')
+    navigateTo('/try')
   } else if (isSubscribed.value) {
     openPortal()
   } else {
@@ -122,8 +122,16 @@ const teamBenefits = [
   { icon: 'i-lucide-shield-check', label: 'Commercial license' }
 ]
 
-// --- FAQ ---
-const faqItems = [
+// --- FAQ with Category Tabs ---
+const activeFaqTab = ref('pricing')
+
+const faqTabItems: TabsItem[] = [
+  { label: 'Pricing', value: 'pricing' },
+  { label: 'General', value: 'general' },
+  { label: 'Account', value: 'account' }
+]
+
+const faqPricing = [
   {
     label: 'What is the difference between Member and Team?',
     content: 'Member gives full access to one developer. Team includes 2 seats so you can invite colleagues to share access, with the ability to add unlimited members.'
@@ -137,14 +145,97 @@ const faqItems = [
     content: 'Lifetime gives you permanent access to all current and future resources with a single payment. No recurring fees ever.'
   },
   {
-    label: 'Can I add more team members?',
-    content: 'The Team plan starts with 2 seats. You can add unlimited members at the same per-user rate.'
+    label: 'How many members can I add to a Team?',
+    content: 'The Team plan starts with 2 seats. You can add unlimited members at the same per-user rate. Each member gets full access to all resources.'
   },
   {
     label: 'What payment methods do you accept?',
     content: 'We accept all major credit cards through Stripe. All prices are in EUR.'
+  },
+  {
+    label: 'Is there a free trial?',
+    content: 'We offer a free plan with access to a selection of resources. No credit card required. Upgrade anytime to unlock the full library.'
+  },
+  {
+    label: 'What is your refund policy?',
+    content: 'We offer a 14-day money-back guarantee on all plans. If you are not satisfied, contact us within 14 days of purchase for a full refund.'
+  },
+  {
+    label: 'Do you charge VAT/tax?',
+    content: 'VAT is applied based on your country of residence. Business customers in the EU can provide their VAT ID to reverse-charge.'
+  },
+  {
+    label: 'Can I upgrade from Member to Lifetime?',
+    content: 'Yes! You can upgrade at any time. Your current subscription will be canceled and you will get lifetime access immediately.'
+  },
+  {
+    label: 'What happens when my subscription expires?',
+    content: 'You will lose access to premium resources but keep access to free resources. Your account and saved data remain intact.'
   }
 ]
+
+const faqGeneral = [
+  {
+    label: 'What is OSMO?',
+    content: 'OSMO is a curated library of production-ready code snippets, UI components, animations, and design assets. Browse, preview, and copy code in seconds.'
+  },
+  {
+    label: 'What technologies are the resources built with?',
+    content: 'Our resources use vanilla HTML, CSS, and JavaScript. They work with any framework or tech stack — just copy, paste, and customize.'
+  },
+  {
+    label: 'How often are new resources added?',
+    content: 'We add new resources regularly, typically multiple times per week. Premium members get early access to the latest additions.'
+  },
+  {
+    label: 'Can I use the resources commercially?',
+    content: 'Yes! All paid plans include a commercial license. You can use the resources in client projects, SaaS products, and commercial applications.'
+  },
+  {
+    label: 'Are Figma source files included?',
+    content: 'Yes, Figma source files are included with all paid plans. You can use them as a starting point for your own designs.'
+  },
+  {
+    label: 'How can I get support?',
+    content: 'You can reach us through our Discord community or via email. Premium members get priority support with faster response times.'
+  }
+]
+
+const faqAccount = [
+  {
+    label: 'How do I create an account?',
+    content: 'Click "Get Started" or "Sign up" and register with your email or sign in with GitHub or Google. It takes less than a minute.'
+  },
+  {
+    label: 'Can I change my email address?',
+    content: 'Yes, you can change your email in your account settings under the General tab. You will need to confirm with your current password.'
+  },
+  {
+    label: 'How do I reset my password?',
+    content: 'Click "Forgot password?" on the login page and enter your email. We will send you a password reset link.'
+  },
+  {
+    label: 'Can I delete my account?',
+    content: 'Yes, you can request account deletion from your account settings. This will permanently remove your account and all associated data.'
+  },
+  {
+    label: 'How do I manage my team?',
+    content: 'Team owners can invite members, remove members, and manage the team from the Team tab in account settings.'
+  },
+  {
+    label: 'Where can I find my invoices?',
+    content: 'Invoices are available in the Billing tab of your account settings. You can also access them through the Stripe Customer Portal.'
+  }
+]
+
+const activeFaqItems = computed(() => {
+  switch (activeFaqTab.value) {
+    case 'pricing': return faqPricing
+    case 'general': return faqGeneral
+    case 'account': return faqAccount
+    default: return faqPricing
+  }
+})
 </script>
 
 <template>
@@ -159,61 +250,26 @@ const faqItems = [
       }"
     />
 
-    <!-- Tabs: For Individuals / For Teams -->
-    <UPageSection
-      :ui="{
-        root: 'pt-0 pb-8'
-      }"
-    >
-      <UTabs
-        v-model="activeTab"
-        :items="tabItems"
-        variant="pill"
-        color="neutral"
-        size="lg"
-        :content="false"
-        :ui="{
-          list: 'justify-center'
-        }"
-      />
-    </UPageSection>
-
-    <!-- ====== FOR INDIVIDUALS ====== -->
-    <UPageSection
-      v-if="activeTab === 'individuals'"
-      :ui="{ root: 'pt-0' }"
-    >
-      <!-- Billing Toggle -->
-      <div class="flex items-center justify-center gap-3 mb-10">
-        <span
-          class="text-sm font-medium transition-colors"
-          :class="!isYearly ? 'text-default' : 'text-muted'"
-        >
-          Quarterly
-        </span>
-        <USwitch
-          v-model="isYearly"
+    <!-- Pricing Section (merged: tabs + cards) -->
+    <UPageSection :ui="{ root: 'pt-0' }">
+      <!-- Tab Switcher: For Individuals / For Teams (centered) -->
+      <div class="flex justify-center mb-10">
+        <UTabs
+          v-model="activeTab"
+          :items="tabItems"
+          variant="pill"
+          color="neutral"
           size="lg"
+          :content="false"
         />
-        <span
-          class="text-sm font-medium transition-colors"
-          :class="isYearly ? 'text-default' : 'text-muted'"
-        >
-          Yearly
-        </span>
-        <UBadge
-          v-if="isYearly"
-          color="primary"
-          variant="subtle"
-          size="sm"
-        >
-          Save ~20%
-        </UBadge>
       </div>
 
-      <!-- Cards Grid: Member + Lifetime -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
-        <!-- Member Card -->
+      <!-- ====== FOR INDIVIDUALS ====== -->
+      <div
+        v-if="activeTab === 'individuals'"
+        class="grid grid-cols-1 lg:grid-cols-2 gap-6"
+      >
+        <!-- Member Card (with inline billing toggle) -->
         <div class="relative rounded-2xl border border-default bg-elevated p-8 flex flex-col">
           <div class="mb-6">
             <h3 class="text-xl font-bold mb-1">
@@ -222,6 +278,34 @@ const faqItems = [
             <p class="text-sm text-muted">
               Full access for one developer.
             </p>
+          </div>
+
+          <!-- Billing Toggle -->
+          <div class="flex items-center gap-2 mb-4">
+            <span
+              class="text-xs font-medium"
+              :class="!isYearly ? 'text-default' : 'text-muted'"
+            >
+              Quarterly
+            </span>
+            <USwitch
+              v-model="isYearly"
+              size="sm"
+            />
+            <span
+              class="text-xs font-medium"
+              :class="isYearly ? 'text-default' : 'text-muted'"
+            >
+              Yearly
+            </span>
+            <UBadge
+              v-if="isYearly"
+              color="primary"
+              variant="subtle"
+              size="xs"
+            >
+              Save ~20%
+            </UBadge>
           </div>
 
           <div class="mb-6">
@@ -259,7 +343,7 @@ const faqItems = [
           />
         </div>
 
-        <!-- Lifetime Card (Highlighted) -->
+        <!-- Lifetime Card (Highlighted, no billing toggle) -->
         <div class="relative rounded-2xl border-2 border-primary bg-primary/5 p-8 flex flex-col ring-1 ring-primary/20">
           <!-- Popular Badge -->
           <div class="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -313,44 +397,14 @@ const faqItems = [
           />
         </div>
       </div>
-    </UPageSection>
 
-    <!-- ====== FOR TEAMS ====== -->
-    <UPageSection
-      v-if="activeTab === 'teams'"
-      :ui="{ root: 'pt-0' }"
-    >
-      <!-- Billing Toggle -->
-      <div class="flex items-center justify-center gap-3 mb-10">
-        <span
-          class="text-sm font-medium transition-colors"
-          :class="!isYearly ? 'text-default' : 'text-muted'"
-        >
-          Quarterly
-        </span>
-        <USwitch
-          v-model="isYearly"
-          size="lg"
-        />
-        <span
-          class="text-sm font-medium transition-colors"
-          :class="isYearly ? 'text-default' : 'text-muted'"
-        >
-          Yearly
-        </span>
-        <UBadge
-          v-if="isYearly"
-          color="primary"
-          variant="subtle"
-          size="sm"
-        >
-          Save ~20% per user
-        </UBadge>
-      </div>
-
-      <!-- Single Team Card, centered -->
-      <div class="max-w-lg mx-auto">
-        <div class="relative rounded-2xl border border-default bg-elevated p-8 flex flex-col">
+      <!-- ====== FOR TEAMS ====== -->
+      <div
+        v-if="activeTab === 'teams'"
+        class="flex justify-center"
+      >
+        <!-- Team Card (with inline billing toggle) -->
+        <div class="relative rounded-2xl border border-default bg-elevated p-8 flex flex-col w-full lg:w-[calc(50%-0.75rem)]">
           <div class="mb-6">
             <h3 class="text-xl font-bold mb-1">
               Team
@@ -358,6 +412,34 @@ const faqItems = [
             <p class="text-sm text-muted">
               Perfect for small teams and agencies.
             </p>
+          </div>
+
+          <!-- Billing Toggle -->
+          <div class="flex items-center gap-2 mb-4">
+            <span
+              class="text-xs font-medium"
+              :class="!isYearly ? 'text-default' : 'text-muted'"
+            >
+              Quarterly
+            </span>
+            <USwitch
+              v-model="isYearly"
+              size="sm"
+            />
+            <span
+              class="text-xs font-medium"
+              :class="isYearly ? 'text-default' : 'text-muted'"
+            >
+              Yearly
+            </span>
+            <UBadge
+              v-if="isYearly"
+              color="primary"
+              variant="subtle"
+              size="xs"
+            >
+              Save ~20% per user
+            </UBadge>
           </div>
 
           <div class="mb-6">
@@ -407,14 +489,23 @@ const faqItems = [
 
     <USeparator />
 
-    <!-- FAQ -->
+    <!-- FAQ with Category Tabs -->
     <UPageSection
       headline="FAQ"
       title="Frequently asked questions"
-      description="Everything you need to know about The Vault and our plans."
+      description="Everything you need to know about OSMO and our plans."
     >
-      <div class="max-w-3xl mx-auto mt-8">
-        <UAccordion :items="faqItems" />
+      <div class="mt-8">
+        <div class="flex justify-center mb-8">
+          <UTabs
+            v-model="activeFaqTab"
+            :items="faqTabItems"
+            variant="pill"
+            color="neutral"
+            :content="false"
+          />
+        </div>
+        <UAccordion :items="activeFaqItems" />
       </div>
     </UPageSection>
 
@@ -426,12 +517,12 @@ const faqItems = [
     >
       <UPageCTA
         title="Start building faster today"
-        description="Join The Vault and explore production-ready components, animations, and code snippets."
+        description="Join OSMO and explore production-ready components, animations, and code snippets."
         variant="subtle"
         :links="[
           {
             label: 'Get Started',
-            to: '/register',
+            to: '/try',
             trailingIcon: 'i-lucide-arrow-right',
             color: 'neutral' as const
           }

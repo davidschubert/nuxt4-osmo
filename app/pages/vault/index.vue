@@ -5,7 +5,7 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'The Vault - Browse Resources'
+  title: 'OSMO - Browse Resources'
 })
 
 const route = useRoute()
@@ -39,7 +39,7 @@ const activeCategory = computed(() => vaultStore.activeCategoryData)
 
 // Breadcrumb items
 const breadcrumbItems = computed(() => {
-  const items = [{ label: 'The Vault', to: '/vault' }]
+  const items = [{ label: 'OSMO', to: '/vault' }]
   if (activeCategory.value) {
     items.push({ label: activeCategory.value.name, to: `/vault?category=${activeCategory.value.slug}` })
   }
@@ -77,7 +77,7 @@ function clearCategory() {
         {{ greeting }} <span class="inline-block">👋</span>
       </p>
       <h1 class="text-4xl md:text-5xl font-serif mb-6">
-        Welcome to<br>the Vault
+        Welcome to<br>OSMO
       </h1>
 
       <!-- Search bar -->

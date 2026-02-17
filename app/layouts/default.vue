@@ -46,7 +46,7 @@ const footerLinks = [
             name="i-lucide-sparkles"
             class="size-5 text-primary"
           />
-          <span class="font-bold text-lg">The Vault</span>
+          <span class="font-bold text-lg">OSMO</span>
         </NuxtLink>
       </template>
 
@@ -55,7 +55,6 @@ const footerLinks = [
       </template>
 
       <template #right>
-        <UColorModeButton />
         <template v-if="!isAuthenticated">
           <UButton
             to="/login"
@@ -94,13 +93,13 @@ const footerLinks = [
               name="i-lucide-sparkles"
               class="size-5 text-primary"
             />
-            <span class="font-bold text-lg">The Vault</span>
+            <span class="font-bold text-lg">OSMO</span>
           </NuxtLink>
           <p class="text-sm text-muted max-w-xs">
             A curated library of production-ready code snippets, UI components, and animations.
           </p>
           <p class="text-sm text-muted">
-            &copy; {{ new Date().getFullYear() }} The Vault. All rights reserved.
+            &copy; {{ new Date().getFullYear() }} OSMO. All rights reserved.
           </p>
         </div>
       </template>

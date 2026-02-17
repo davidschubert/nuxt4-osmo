@@ -38,12 +38,22 @@ const extraNavItems = computed(() => {
   <UDashboardSidebar
     v-model:collapsed="sidebarCollapsed"
     collapsible
-    :default-size="18"
+    resizable
+    :default-size="300"
+    :min-size="250"
+    :max-size="400"
+    storage-key="vault-v2"
+    :ui="{
+      root: '[&:not([data-collapsed])]:min-w-[300px]',
+      header: 'px-4',
+      body: 'px-0 py-2',
+      footer: 'px-0 py-0 flex-col items-stretch'
+    }"
   >
     <template #header>
       <NuxtLink
         to="/vault"
-        class="flex items-center gap-2 px-2"
+        class="flex items-center gap-2 px-4"
       >
         <UIcon
           name="i-lucide-sparkles"
@@ -55,29 +65,34 @@ const extraNavItems = computed(() => {
       </NuxtLink>
     </template>
 
-    <UNavigationMenu
-      :items="vaultNavItems"
-      orientation="vertical"
-      :ui="{
-        childList: 'ms-0 border-s-0',
-        childItem: 'ps-0 ms-0',
-        link: 'px-3 py-2 gap-2',
-        childLink: 'px-3 py-2 gap-2'
-      }"
-    />
+    <div class="px-4">
+      <UNavigationMenu
+        :items="vaultNavItems"
+        orientation="vertical"
+        :ui="{
+          childList: 'ms-0 border-s-0',
+          childItem: 'ps-0 ms-0',
+          link: 'px-3 py-2 gap-2',
+          childLink: 'px-3 py-2 gap-2'
+        }"
+      />
+    </div>
 
     <USeparator class="my-2" />
 
-    <UNavigationMenu
-      :items="extraNavItems"
-      orientation="vertical"
-      :ui="{
-        link: 'px-3 py-2 gap-2'
-      }"
-    />
+    <div class="px-4">
+      <UNavigationMenu
+        :items="extraNavItems"
+        orientation="vertical"
+        :ui="{
+          link: 'px-3 py-2 gap-2'
+        }"
+      />
+    </div>
 
     <template #footer>
-      <div class="pt-2 border-t border-default">
+      <USeparator />
+      <div class="px-4 pt-4">
         <AppUserMenu />
       </div>
     </template>

@@ -6,7 +6,7 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Join Team - The Vault'
+  title: 'Join Team - OSMO'
 })
 
 const route = useRoute()
@@ -28,8 +28,8 @@ onMounted(async () => {
   }
 
   if (!isAuthenticated.value) {
-    // Redirect to register with return URL
-    await navigateTo(`/register?redirect=${encodeURIComponent(`/invite?token=${token}&teamId=${teamId}`)}`)
+    // Redirect to try page with return URL
+    await navigateTo(`/try?redirect=${encodeURIComponent(`/invite?token=${token}&teamId=${teamId}`)}`)
     return
   }
 

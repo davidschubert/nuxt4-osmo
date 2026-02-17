@@ -55,7 +55,7 @@ watch(resource, async (res) => {
 // Breadcrumb
 const breadcrumbItems = computed(() => {
   const items = [
-    { label: 'The Vault', to: '/vault' }
+    { label: 'OSMO', to: '/vault' }
   ]
   if (category.value) {
     items.push({
@@ -73,7 +73,7 @@ const breadcrumbItems = computed(() => {
 })
 
 // SEO
-const pageTitle = computed(() => resource.value ? `${resource.value.title} - The Vault` : 'Resource - The Vault')
+const pageTitle = computed(() => resource.value ? `${resource.value.title} - OSMO` : 'Resource - OSMO')
 const pageDescription = computed(() => resource.value?.description ?? '')
 
 useSeoMeta({

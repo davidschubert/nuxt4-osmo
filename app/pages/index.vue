@@ -6,16 +6,16 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'The Vault - Code Snippets, UI Components & Animations',
+  title: 'OSMO - Code Snippets, UI Components & Animations',
   description: 'A curated library of production-ready code snippets, UI components, animations, and design assets. Browse, preview, and copy code in seconds.',
-  ogTitle: 'The Vault - Code Snippets, UI Components & Animations',
+  ogTitle: 'OSMO - Code Snippets, UI Components & Animations',
   ogDescription: 'A curated library of production-ready code snippets, UI components, animations, and design assets.'
 })
 
 const heroLinks: ButtonProps[] = [
   {
     label: 'Get Started for Free',
-    to: '/register',
+    to: '/try',
     trailingIcon: 'i-lucide-arrow-right',
     size: 'xl'
   },
@@ -64,7 +64,7 @@ const features: PageFeatureProps[] = [
 const ctaLinks: ButtonProps[] = [
   {
     label: 'Get Started for Free',
-    to: '/register',
+    to: '/try',
     trailingIcon: 'i-lucide-arrow-right',
     color: 'neutral'
   },
@@ -138,7 +138,7 @@ const stats = [
     <UPageSection
       headline="How it works"
       title="From browse to build in seconds"
-      description="The Vault is designed to get you from idea to implementation as fast as possible."
+      description="OSMO is designed to get you from idea to implementation as fast as possible."
     >
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 mt-8">
         <div class="text-center space-y-3">
@@ -194,7 +194,7 @@ const stats = [
     >
       <UPageCTA
         title="Ready to supercharge your workflow?"
-        description="Join developers and designers using The Vault to build faster. Start for free, upgrade when you need more."
+        description="Join developers and designers using OSMO to build faster. Start for free, upgrade when you need more."
         variant="subtle"
         :links="ctaLinks"
         class="rounded-none sm:rounded-xl"

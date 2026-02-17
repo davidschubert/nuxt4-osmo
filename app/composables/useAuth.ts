@@ -249,7 +249,7 @@ export function useAuth() {
           title: 'Check your email!',
           description: 'We sent you a verification link. Please verify your email to continue.'
         })
-        await navigateTo('/register?verify=pending')
+        await navigateTo('/welcome')
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Registration failed. Please try again.'

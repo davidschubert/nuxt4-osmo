@@ -4,7 +4,7 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Verify Email - The Vault'
+  title: 'Verify Email - OSMO'
 })
 
 const route = useRoute()
@@ -67,7 +67,7 @@ onMounted(async () => {
           Email verified!
         </h2>
         <p class="text-sm text-muted">
-          Your email has been successfully verified. You now have full access to The Vault.
+          Your email has been successfully verified. You now have full access to OSMO.
         </p>
         <UButton
           to="/vault"

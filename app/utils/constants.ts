@@ -62,7 +62,7 @@ export const PRICING = {
 
 // App metadata
 export const APP = {
-  NAME: 'The Vault',
+  NAME: 'OSMO',
   DESCRIPTION: 'A curated library of code snippets, UI components, animations, and design assets.',
   URL: 'https://vault.example.com'
 } as const

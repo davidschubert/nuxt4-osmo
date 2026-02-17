@@ -5,7 +5,7 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Account - The Vault'
+  title: 'Account - OSMO'
 })
 
 const route = useRoute()

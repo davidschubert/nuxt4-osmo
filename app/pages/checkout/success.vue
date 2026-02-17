@@ -4,7 +4,7 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Checkout Successful - The Vault',
+  title: 'Checkout Successful - OSMO',
   description: 'Your subscription has been activated. Welcome to Pro!'
 })
 
@@ -66,14 +66,14 @@ onMounted(() => {
           Welcome to Pro!
         </h1>
         <p class="text-muted">
-          Your subscription is active. You now have full access to all premium resources in The Vault.
+          Your subscription is active. You now have full access to all premium resources in OSMO.
         </p>
         <UButton
           to="/vault"
           size="lg"
           trailing-icon="i-lucide-arrow-right"
         >
-          Go to The Vault
+          Go to OSMO
         </UButton>
       </template>
 
@@ -97,7 +97,7 @@ onMounted(() => {
             size="lg"
             trailing-icon="i-lucide-arrow-right"
           >
-            Go to The Vault
+            Go to OSMO
           </UButton>
           <UButton
             variant="outline"

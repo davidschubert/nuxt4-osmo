@@ -12,7 +12,7 @@ defineProps<{
     <!-- Loading skeleton -->
     <div
       v-if="loading"
-      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 min-[1920px]:grid-cols-5 gap-4"
     >
       <div
         v-for="i in 10"
@@ -46,7 +46,7 @@ defineProps<{
       v-else
       role="list"
       aria-live="polite"
-      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 min-[1920px]:grid-cols-5 gap-4"
     >
       <div
         v-for="resource in resources"

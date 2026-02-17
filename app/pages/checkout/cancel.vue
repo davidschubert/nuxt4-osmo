@@ -4,7 +4,7 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Checkout Canceled - The Vault',
+  title: 'Checkout Canceled - OSMO',
   description: 'Your checkout was canceled. No charges were made.'
 })
 </script>
@@ -22,7 +22,7 @@ useSeoMeta({
         Checkout canceled
       </h1>
       <p class="text-muted">
-        No worries – no charges were made. You can try again anytime or continue using The Vault for free.
+        No worries – no charges were made. You can try again anytime or continue using OSMO for free.
       </p>
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
         <UButton
@@ -37,7 +37,7 @@ useSeoMeta({
           color="neutral"
           size="lg"
         >
-          Back to The Vault
+          Back to OSMO
         </UButton>
       </div>
     </div>

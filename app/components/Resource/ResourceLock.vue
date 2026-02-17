@@ -8,7 +8,7 @@ const { startCheckout, checkoutLoading } = useSubscription()
 
 function handleUpgrade() {
   if (!isAuthenticated.value) {
-    navigateTo('/register')
+    navigateTo('/try')
   } else {
     startCheckout()
   }
