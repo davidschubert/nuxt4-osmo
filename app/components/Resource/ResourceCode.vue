@@ -136,11 +136,13 @@ async function copyCode(code: string) {
         </div>
 
         <!-- Code content: highlighted or fallback -->
+        <!-- eslint-disable vue/no-v-html -- Sanitized via DOMPurify with strict ALLOWED_TAGS -->
         <div
           v-if="highlightedBlocks.get(codeStep.label)"
           class="p-4 overflow-x-auto text-sm leading-relaxed [&_pre]:!bg-transparent [&_pre]:!m-0 [&_pre]:!p-0 [&_code]:text-xs [&_code]:font-mono"
           v-html="highlightedBlocks.get(codeStep.label)"
         />
+        <!-- eslint-enable vue/no-v-html -->
         <pre
           v-else
           class="p-4 overflow-x-auto text-sm leading-relaxed"

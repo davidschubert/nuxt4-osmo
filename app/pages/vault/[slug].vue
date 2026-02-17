@@ -225,6 +225,7 @@ const sanitizedNotes = computed(() => {
                 Implementation
               </h2>
               <div class="prose prose-sm prose-invert max-w-none">
+                <!-- eslint-disable-next-line vue/no-v-html -- Sanitized via DOMPurify -->
                 <div v-html="sanitizedNotes" />
               </div>
             </div>

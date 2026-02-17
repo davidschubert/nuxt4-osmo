@@ -219,6 +219,87 @@ Uses `UDashboardGroup` > `UDashboardSidebar` (collapsible, resizable) + `UDashbo
 **Toasts**:
 `useToast().add({ title, description })` for feedback (copy confirmation, errors, etc.).
 
+## Nuxt UI Components in Use
+
+Complete inventory of all `@nuxt/ui` components and composables used in this project (31 components, 6 composables across 36 Vue files).
+
+### Layout & Dashboard (8)
+
+| Component | Description | Used In |
+|---|---|---|
+| `UApp` | Root application wrapper | `app.vue` |
+| `UDashboardGroup` | Dashboard layout container | `layouts/vault.vue`, `layouts/admin.vue` |
+| `UDashboardSidebar` | Collapsible sidebar (resizable, cookie-persisted) | `VaultSidebar`, `AdminSidebar` |
+| `UDashboardPanel` | Main content panel | `layouts/vault.vue`, `layouts/admin.vue` |
+| `UDashboardNavbar` | Top navbar in dashboard layouts | `layouts/vault.vue`, `layouts/admin.vue` |
+| `UDashboardSidebarCollapse` | Sidebar toggle button | `layouts/vault.vue`, `layouts/admin.vue` |
+| `UDashboardSearch` | Command palette (Meta+K) | `AppSearch` |
+| `UDashboardSearchButton` | Search trigger button in navbar | `layouts/vault.vue` |
+
+### Public Layout (3)
+
+| Component | Description | Used In |
+|---|---|---|
+| `UHeader` | Page header with navigation | `layouts/default.vue` |
+| `UMain` | Main content wrapper | `layouts/default.vue` |
+| `UFooter` | Page footer with links | `layouts/default.vue` |
+
+### Data Display (6)
+
+| Component | Description | Used In |
+|---|---|---|
+| `UIcon` | Iconify icons (Lucide, Simple Icons) | 25+ files (most used) |
+| `UBadge` | Status and count badges | `VaultCard`, vault pages, admin |
+| `UAvatar` | User avatars | `AppUserMenu`, `AppNotifications`, admin |
+| `UTable` | Data tables with sorting/selection | Admin users, admin resources |
+| `UCard` | Card containers | Admin dashboard stats |
+| `USkeleton` | Loading placeholders | `VaultGrid`, resource detail, team |
+
+### Navigation (3)
+
+| Component | Description | Used In |
+|---|---|---|
+| `UNavigationMenu` | Vertical/horizontal navigation | `VaultSidebar`, `AdminSidebar`, header |
+| `UBreadcrumb` | Breadcrumb navigation | Vault category, resource detail |
+| `UTabs` | Tab navigation | Account page, plans page |
+
+### Forms & Inputs (4)
+
+| Component | Description | Used In |
+|---|---|---|
+| `UButton` | Buttons and link-buttons | 22+ files (second most used) |
+| `UInput` | Text input fields | Vault search, account, team |
+| `UCheckbox` | Checkboxes | Admin user table (row selection) |
+| `USwitch` | Toggle switch | Dark mode toggle in user menu |
+
+### Overlays & Popups (3)
+
+| Component | Description | Used In |
+|---|---|---|
+| `UModal` | Modal dialogs | Keyboard shortcuts help |
+| `USlideover` | Slide-over panel | `AppNotifications` |
+| `UDropdownMenu` | Dropdown menu | `AppUserMenu` |
+
+### Other (4)
+
+| Component | Description | Used In |
+|---|---|---|
+| `USeparator` | Horizontal dividers | Sidebar, layouts, account |
+| `UColorModeButton` | Built-in dark/light toggle button | `layouts/default.vue` header |
+| `UPageCard` | Centered form card | Login, register, verify-email, invite |
+| `UAuthForm` | Login/register form with OAuth providers | `pages/login.vue`, `pages/register.vue` |
+
+### Composables (6)
+
+| Composable | Description | Used In |
+|---|---|---|
+| `useColorMode()` | Dark/light mode state | `AppUserMenu`, `app.vue` |
+| `useToast()` | Toast notifications | `ResourceCode`, `invite` |
+| `useRoute()` | Current route and query params | Vault pages, account, sidebar |
+| `useRouter()` | Programmatic navigation | Account tabs, search |
+| `useHead()` | HTML head metadata | `app.vue` |
+| `useSeoMeta()` | SEO meta tags | All pages |
+
 ## Appwrite Integration
 
 Uses the official `appwrite` Web SDK (npm: `appwrite`) directly, **not** the unofficial `nuxt-appwrite` module. A custom composable `app/composables/useAppwrite.ts` initializes the SDK as singletons.

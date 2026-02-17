@@ -10,6 +10,25 @@ useSeoMeta({
 
 const { stats } = useAdmin()
 const { categoriesWithCount } = useCategories()
+
+// User count from admin users API
+const userCount = ref(0)
+onMounted(async () => {
+  if (isMockMode()) {
+    userCount.value = 8
+  } else {
+    try {
+      const authStore = useAuthStore()
+      const result = await $fetch('/api/admin/users', {
+        query: { limit: 1 },
+        headers: { 'x-user-id': authStore.user?.userId || '' }
+      })
+      userCount.value = result.total
+    } catch {
+      // Silently fail — user count is non-critical
+    }
+  }
+})
 </script>
 
 <template>
@@ -19,7 +38,24 @@ const { categoriesWithCount } = useCategories()
     </h1>
 
     <!-- Stats cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <UCard>
+        <div class="flex items-center gap-3">
+          <UIcon
+            name="i-lucide-users"
+            class="size-8 text-blue-500"
+          />
+          <div>
+            <p class="text-2xl font-bold">
+              {{ userCount }}
+            </p>
+            <p class="text-sm text-muted">
+              Users
+            </p>
+          </div>
+        </div>
+      </UCard>
+
       <UCard>
         <div class="flex items-center gap-3">
           <UIcon
@@ -143,6 +179,13 @@ const { categoriesWithCount } = useCategories()
           to="/admin/resources/new"
           icon="i-lucide-plus"
           label="New Resource"
+        />
+        <UButton
+          to="/admin/users"
+          icon="i-lucide-users"
+          label="Manage Users"
+          variant="outline"
+          color="neutral"
         />
         <UButton
           to="/admin/categories"

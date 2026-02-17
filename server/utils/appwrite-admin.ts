@@ -1,15 +1,16 @@
-import { Client, Databases, Query } from 'node-appwrite'
+import { Client, Databases, Users, Query } from 'node-appwrite'
 
 let client: Client | null = null
 let databases: Databases | null = null
+let users: Users | null = null
 
 /**
  * Singleton node-appwrite admin client for server API routes.
  * Uses API key auth for full database access (e.g. updating UserProfile from webhooks).
  */
 export function useAppwriteAdmin() {
-  if (client && databases) {
-    return { client, databases, Query }
+  if (client && databases && users) {
+    return { client, databases, users, Query }
   }
 
   const config = useRuntimeConfig()
@@ -30,6 +31,7 @@ export function useAppwriteAdmin() {
     .setKey(apiKey)
 
   databases = new Databases(client)
+  users = new Users(client)
 
-  return { client, databases, Query }
+  return { client, databases, users, Query }
 }

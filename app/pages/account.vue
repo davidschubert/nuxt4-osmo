@@ -8,20 +8,117 @@ useSeoMeta({
   title: 'Account - The Vault'
 })
 
+const route = useRoute()
+const router = useRouter()
 const { user, isSubscribed, updateDisplayName, updateUserEmail, updatePassword } = useAuth()
 const authStore = useAuthStore()
 const { openPortal, portalLoading, mockCancelSubscription, isMockMode } = useSubscription()
 
-// Active tab for account sections
-const activeTab = ref('profile')
+// ─── Tab Navigation ─────────────────────────────
 
-const tabs = [
-  { label: 'Profile', value: 'profile', icon: 'i-lucide-user' },
-  { label: 'Account', value: 'account', icon: 'i-lucide-settings' },
+const tabItems = [
+  { label: 'General', value: 'general', icon: 'i-lucide-user' },
+  { label: 'Security', value: 'security', icon: 'i-lucide-shield' },
   { label: 'Plan', value: 'plan', icon: 'i-lucide-credit-card' },
   { label: 'Team', value: 'team', icon: 'i-lucide-users' },
   { label: 'Billing', value: 'billing', icon: 'i-lucide-receipt' }
 ]
+
+// Sync active tab with URL query
+const activeTab = computed({
+  get: () => (route.query.tab as string) || 'general',
+  set: (tab: string) => router.replace({ query: { tab } })
+})
+
+// ─── General Tab: Inline Editing ──────────────────
+
+const generalForm = reactive({
+  name: user.value?.displayName || '',
+  email: user.value?.email || ''
+})
+
+// Track original values to detect changes
+const originalName = computed(() => user.value?.displayName || '')
+const originalEmail = computed(() => user.value?.email || '')
+const hasGeneralChanges = computed(() =>
+  generalForm.name !== originalName.value
+  || generalForm.email !== originalEmail.value
+)
+
+// If email changed, we need password confirmation
+const emailChanged = computed(() => generalForm.email !== originalEmail.value)
+const emailPassword = ref('')
+
+const generalSaving = ref(false)
+
+async function saveGeneral() {
+  generalSaving.value = true
+  try {
+    if (generalForm.name !== originalName.value) {
+      await updateDisplayName(generalForm.name)
+    }
+    if (generalForm.email !== originalEmail.value) {
+      if (!emailPassword.value) return
+      await updateUserEmail(generalForm.email, emailPassword.value)
+      emailPassword.value = ''
+    }
+  } catch {
+    // Toast already shown by composable
+  } finally {
+    generalSaving.value = false
+  }
+}
+
+// Sync form when user data updates
+watch(user, (u) => {
+  if (u) {
+    generalForm.name = u.displayName
+    generalForm.email = u.email
+  }
+}, { deep: true })
+
+// ─── Security Tab: Password ───────────────────────
+
+const passwordForm = reactive({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+
+const passwordError = computed(() => {
+  if (passwordForm.newPassword && passwordForm.confirmPassword
+    && passwordForm.newPassword !== passwordForm.confirmPassword) {
+    return 'Passwords do not match'
+  }
+  return ''
+})
+
+const passwordValid = computed(() =>
+  passwordForm.oldPassword
+  && passwordForm.newPassword
+  && passwordForm.confirmPassword
+  && !passwordError.value
+  && passwordForm.newPassword.length >= 8
+)
+
+const passwordLoading = ref(false)
+
+async function submitPassword() {
+  if (!passwordValid.value) return
+  passwordLoading.value = true
+  try {
+    await updatePassword(passwordForm.oldPassword, passwordForm.newPassword)
+    passwordForm.oldPassword = ''
+    passwordForm.newPassword = ''
+    passwordForm.confirmPassword = ''
+  } catch {
+    // Toast already shown by composable
+  } finally {
+    passwordLoading.value = false
+  }
+}
+
+// ─── Plan Tab ─────────────────────────────────────
 
 const subscriptionLabel = computed(() => {
   if (user.value?.planType === 'lifetime') return 'Lifetime Member'
@@ -35,477 +132,318 @@ const subscriptionLabel = computed(() => {
       return 'Free Plan'
   }
 })
-
-// --- Modal state ---
-const showNameModal = ref(false)
-const showEmailModal = ref(false)
-const showPasswordModal = ref(false)
-
-// --- Form data ---
-const nameForm = ref('')
-const emailForm = reactive({ email: '', password: '' })
-const passwordForm = reactive({ oldPassword: '', newPassword: '', confirmPassword: '' })
-
-// --- Loading state ---
-const nameLoading = ref(false)
-const emailLoading = ref(false)
-const passwordLoading = ref(false)
-
-// --- Handlers ---
-function openNameModal() {
-  nameForm.value = user.value?.displayName || ''
-  showNameModal.value = true
-}
-
-function openEmailModal() {
-  emailForm.email = ''
-  emailForm.password = ''
-  showEmailModal.value = true
-}
-
-function openPasswordModal() {
-  passwordForm.oldPassword = ''
-  passwordForm.newPassword = ''
-  passwordForm.confirmPassword = ''
-  showPasswordModal.value = true
-}
-
-async function submitName() {
-  nameLoading.value = true
-  try {
-    await updateDisplayName(nameForm.value)
-    showNameModal.value = false
-  } catch {
-    // Toast already shown by composable
-  } finally {
-    nameLoading.value = false
-  }
-}
-
-async function submitEmail() {
-  emailLoading.value = true
-  try {
-    await updateUserEmail(emailForm.email, emailForm.password)
-    showEmailModal.value = false
-  } catch {
-    // Toast already shown by composable
-  } finally {
-    emailLoading.value = false
-  }
-}
-
-const passwordError = computed(() => {
-  if (passwordForm.newPassword && passwordForm.confirmPassword
-    && passwordForm.newPassword !== passwordForm.confirmPassword) {
-    return 'Passwords do not match'
-  }
-  return ''
-})
-
-async function submitPassword() {
-  if (passwordForm.newPassword !== passwordForm.confirmPassword) return
-  passwordLoading.value = true
-  try {
-    await updatePassword(passwordForm.oldPassword, passwordForm.newPassword)
-    showPasswordModal.value = false
-  } catch {
-    // Toast already shown by composable
-  } finally {
-    passwordLoading.value = false
-  }
-}
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto p-6 lg:p-8">
-    <h1 class="text-2xl font-bold mb-6">
-      Account Settings
-    </h1>
+  <div>
+    <!-- Header + Tabs (full-width with bottom border) -->
+    <div class="border-b border-default">
+      <div class="max-w-3xl mx-auto px-6 lg:px-8">
+        <h1 class="text-2xl font-bold pt-6 pb-4">
+          Account
+        </h1>
+        <UTabs
+          v-model="activeTab"
+          :items="tabItems"
+          variant="link"
+          :content="false"
+        />
+      </div>
+    </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-8">
-      <!-- Sidebar Navigation -->
-      <nav class="space-y-1">
-        <button
-          v-for="tab in tabs"
-          :key="tab.value"
-          class="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors"
-          :class="activeTab === tab.value
-            ? 'bg-primary/10 text-primary'
-            : 'text-muted hover:text-default hover:bg-muted/50'"
-          @click="activeTab = tab.value"
-        >
-          <UIcon
-            :name="tab.icon"
-            class="size-4"
-          />
-          {{ tab.label }}
-        </button>
-      </nav>
+    <!-- Tab Content (centered) -->
+    <div class="max-w-3xl mx-auto px-6 lg:px-8 py-6">
+      <!-- General Tab -->
+      <div v-if="activeTab === 'general'">
+        <div class="space-y-8">
+          <!-- Avatar Section -->
+          <div class="flex items-center gap-4">
+            <UAvatar
+              size="xl"
+              :text="authStore.initials"
+              :src="user?.avatarUrl"
+            />
+            <div class="space-y-1">
+              <p class="text-sm font-medium">
+                Profile Photo
+              </p>
+              <UButton
+                variant="outline"
+                color="neutral"
+                size="xs"
+              >
+                Change photo
+              </UButton>
+            </div>
+          </div>
 
-      <!-- Content -->
-      <div class="space-y-6">
-        <!-- Profile Tab -->
-        <div v-if="activeTab === 'profile'">
+          <USeparator />
+
+          <!-- Inline Form -->
           <div class="space-y-6">
-            <!-- Avatar -->
-            <div class="flex items-center gap-4">
-              <UAvatar
-                size="xl"
-                :text="authStore.initials"
-                :src="user?.avatarUrl"
+            <div class="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-4 items-start">
+              <label class="text-sm font-medium text-muted sm:pt-2">Display Name</label>
+              <UInput
+                v-model="generalForm.name"
+                placeholder="Your name"
               />
-              <div>
-                <UButton
-                  variant="outline"
-                  color="neutral"
-                  size="sm"
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-4 items-start">
+              <label class="text-sm font-medium text-muted sm:pt-2">Email</label>
+              <div class="space-y-2">
+                <UInput
+                  v-model="generalForm.email"
+                  type="email"
+                  placeholder="your@email.com"
+                />
+                <!-- Password confirmation for email change -->
+                <div
+                  v-if="emailChanged"
+                  class="space-y-1"
                 >
-                  Change photo
+                  <p class="text-xs text-muted">
+                    Enter your current password to confirm email change
+                  </p>
+                  <UInput
+                    v-model="emailPassword"
+                    type="password"
+                    placeholder="Current password"
+                    size="sm"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <div class="flex justify-end">
+            <UButton
+              :loading="generalSaving"
+              :disabled="!hasGeneralChanges || (emailChanged && !emailPassword)"
+              @click="saveGeneral"
+            >
+              Save changes
+            </UButton>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Tab -->
+      <div v-if="activeTab === 'security'">
+        <div class="space-y-6">
+          <!-- Password Card -->
+          <UCard>
+            <template #header>
+              <h3 class="font-semibold">
+                Change Password
+              </h3>
+            </template>
+
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-4 items-start">
+                <label class="text-sm font-medium text-muted sm:pt-2">Current Password</label>
+                <UInput
+                  v-model="passwordForm.oldPassword"
+                  type="password"
+                  placeholder="Enter current password"
+                />
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-4 items-start">
+                <label class="text-sm font-medium text-muted sm:pt-2">New Password</label>
+                <UInput
+                  v-model="passwordForm.newPassword"
+                  type="password"
+                  placeholder="Min. 8 characters"
+                />
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-4 items-start">
+                <label class="text-sm font-medium text-muted sm:pt-2">Confirm Password</label>
+                <UInput
+                  v-model="passwordForm.confirmPassword"
+                  type="password"
+                  placeholder="Confirm new password"
+                  :color="passwordError ? 'error' : undefined"
+                  @keydown.enter="submitPassword"
+                />
+              </div>
+
+              <p
+                v-if="passwordError"
+                class="text-xs text-error"
+              >
+                {{ passwordError }}
+              </p>
+
+              <div class="flex justify-end">
+                <UButton
+                  :loading="passwordLoading"
+                  :disabled="!passwordValid"
+                  @click="submitPassword"
+                >
+                  Update password
                 </UButton>
               </div>
             </div>
+          </UCard>
 
-            <USeparator />
-
-            <!-- Name -->
-            <div class="space-y-2">
-              <label class="text-xs font-medium text-muted uppercase tracking-wider">Name</label>
-              <p class="text-sm font-medium">
-                {{ user?.displayName }}
-              </p>
-              <UButton
-                variant="link"
-                color="primary"
-                size="xs"
-                @click="openNameModal"
-              >
-                Change name
-              </UButton>
-            </div>
-
-            <USeparator />
-
-            <!-- Email -->
-            <div class="space-y-2">
-              <label class="text-xs font-medium text-muted uppercase tracking-wider">Email</label>
-              <p class="text-sm font-medium">
-                {{ user?.email }}
-              </p>
-              <UButton
-                variant="link"
-                color="primary"
-                size="xs"
-                @click="openEmailModal"
-              >
-                Change email
-              </UButton>
-            </div>
-
-            <USeparator />
-
-            <!-- Password -->
-            <div class="space-y-2">
-              <label class="text-xs font-medium text-muted uppercase tracking-wider">Password</label>
-              <p class="text-sm text-muted">
-                ********
-              </p>
-              <UButton
-                variant="link"
-                color="primary"
-                size="xs"
-                @click="openPasswordModal"
-              >
-                Change password
-              </UButton>
-            </div>
-          </div>
-        </div>
-
-        <!-- Account Tab -->
-        <div v-if="activeTab === 'account'">
-          <div class="space-y-6">
-            <div class="space-y-2">
-              <label class="text-xs font-medium text-muted uppercase tracking-wider">Billing Address</label>
-              <p class="text-sm text-muted">
-                No billing address set
-              </p>
-              <UButton
-                variant="link"
-                color="neutral"
-                size="xs"
-                disabled
-                class="opacity-50"
-              >
-                Change address (Coming soon)
-              </UButton>
-            </div>
-
-            <USeparator />
-
-            <div class="space-y-2">
-              <label class="text-xs font-medium text-muted uppercase tracking-wider">Organization</label>
-              <p class="text-sm text-muted">
-                No organization set
-              </p>
-              <UButton
-                variant="link"
-                color="neutral"
-                size="xs"
-                disabled
-                class="opacity-50"
-              >
-                Change organization (Coming soon)
-              </UButton>
-            </div>
-          </div>
-        </div>
-
-        <!-- Plan Tab -->
-        <div v-if="activeTab === 'plan'">
-          <div class="space-y-6">
-            <div class="space-y-2">
-              <h3 class="text-lg font-semibold">
-                {{ subscriptionLabel }}
+          <!-- Danger Zone -->
+          <UCard class="border-error/20">
+            <template #header>
+              <h3 class="font-semibold text-error">
+                Danger Zone
               </h3>
-              <p
-                v-if="!isSubscribed"
-                class="text-sm text-muted"
+            </template>
+
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <p class="text-sm font-medium">
+                  Delete Account
+                </p>
+                <p class="text-xs text-muted">
+                  Permanently delete your account and all associated data. This action cannot be undone.
+                </p>
+              </div>
+              <UButton
+                variant="outline"
+                color="error"
+                class="shrink-0"
+                disabled
               >
-                You are on the free plan. Upgrade to unlock all resources.
-              </p>
-              <template v-else>
-                <p class="text-sm text-muted">
-                  You have full access to all resources.
-                </p>
-                <p
-                  v-if="user?.subscribedAt"
-                  class="text-xs text-muted"
-                >
-                  Subscribed since {{ new Date(user.subscribedAt).toLocaleDateString() }}
-                </p>
+                Delete Account
+              </UButton>
+            </div>
+          </UCard>
+        </div>
+      </div>
+
+      <!-- Plan Tab -->
+      <div v-if="activeTab === 'plan'">
+        <div class="space-y-6">
+          <UCard>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold">
+                    {{ subscriptionLabel }}
+                  </h3>
+                  <p
+                    v-if="!isSubscribed"
+                    class="text-sm text-muted"
+                  >
+                    You are on the free plan. Upgrade to unlock all resources.
+                  </p>
+                  <p
+                    v-else
+                    class="text-sm text-muted"
+                  >
+                    You have full access to all resources.
+                  </p>
+                </div>
                 <UBadge
                   v-if="user?.planType === 'lifetime'"
                   color="warning"
                   variant="subtle"
-                  size="sm"
                 >
-                  Lifetime — no recurring payments
+                  Lifetime
                 </UBadge>
-              </template>
-            </div>
+              </div>
 
-            <UButton
-              v-if="!isSubscribed"
-              to="/plans"
-            >
-              View Plans
-            </UButton>
-            <div
-              v-else
-              class="flex items-center gap-3"
-            >
-              <UButton
-                v-if="user?.planType !== 'lifetime'"
-                :loading="portalLoading"
-                @click="openPortal()"
-              >
-                Manage Subscription
-              </UButton>
-              <UButton
-                v-if="isMockMode"
-                variant="outline"
-                color="neutral"
-                @click="mockCancelSubscription()"
-              >
-                Cancel (Mock)
-              </UButton>
-            </div>
-          </div>
-        </div>
-
-        <!-- Team Tab -->
-        <div v-if="activeTab === 'team'">
-          <AccountTeam />
-        </div>
-
-        <!-- Billing Tab -->
-        <div v-if="activeTab === 'billing'">
-          <div class="space-y-6">
-            <div class="space-y-2">
-              <label class="text-xs font-medium text-muted uppercase tracking-wider">Payment Information</label>
               <p
-                v-if="!isSubscribed"
-                class="text-sm text-muted"
+                v-if="user?.subscribedAt"
+                class="text-xs text-muted"
               >
-                No payment method on file. Subscribe to add a payment method.
+                Subscribed since {{ new Date(user.subscribedAt).toLocaleDateString() }}
               </p>
-              <template v-else>
-                <p class="text-sm text-muted">
-                  Payment methods and invoices are managed through the Stripe Customer Portal.
-                </p>
+
+              <div class="flex items-center gap-3">
                 <UButton
+                  v-if="!isSubscribed"
+                  to="/plans"
+                >
+                  View Plans
+                </UButton>
+                <UButton
+                  v-if="isSubscribed && user?.planType !== 'lifetime'"
                   :loading="portalLoading"
                   @click="openPortal()"
                 >
-                  Manage Billing
+                  Manage Subscription
                 </UButton>
-              </template>
+                <UButton
+                  v-if="isMockMode && isSubscribed"
+                  variant="outline"
+                  color="neutral"
+                  @click="mockCancelSubscription()"
+                >
+                  Cancel (Mock)
+                </UButton>
+              </div>
             </div>
+          </UCard>
+        </div>
+      </div>
 
-            <USeparator />
+      <!-- Team Tab -->
+      <div v-if="activeTab === 'team'">
+        <AccountTeam />
+      </div>
 
-            <div class="space-y-2">
-              <label class="text-xs font-medium text-muted uppercase tracking-wider">Invoices</label>
-              <p
-                v-if="!isSubscribed"
-                class="text-sm text-muted"
-              >
-                No invoices yet
-              </p>
-              <p
-                v-else
-                class="text-sm text-muted"
-              >
-                View and download invoices in the Stripe Customer Portal.
+      <!-- Billing Tab -->
+      <div v-if="activeTab === 'billing'">
+        <div class="space-y-6">
+          <UCard>
+            <template #header>
+              <h3 class="font-semibold">
+                Payment Information
+              </h3>
+            </template>
+
+            <div v-if="!isSubscribed">
+              <p class="text-sm text-muted">
+                No payment method on file. Subscribe to add a payment method.
               </p>
             </div>
-          </div>
+            <div
+              v-else
+              class="space-y-4"
+            >
+              <p class="text-sm text-muted">
+                Payment methods and invoices are managed through the Stripe Customer Portal.
+              </p>
+              <UButton
+                :loading="portalLoading"
+                @click="openPortal()"
+              >
+                Manage Billing
+              </UButton>
+            </div>
+          </UCard>
+
+          <UCard>
+            <template #header>
+              <h3 class="font-semibold">
+                Invoices
+              </h3>
+            </template>
+
+            <p
+              v-if="!isSubscribed"
+              class="text-sm text-muted"
+            >
+              No invoices yet
+            </p>
+            <p
+              v-else
+              class="text-sm text-muted"
+            >
+              View and download invoices in the Stripe Customer Portal.
+            </p>
+          </UCard>
         </div>
       </div>
     </div>
-
-    <!-- Change Name Modal -->
-    <UModal v-model:open="showNameModal">
-      <template #content>
-        <div class="p-6 space-y-4">
-          <h3 class="text-lg font-semibold">
-            Change Name
-          </h3>
-          <UFormField label="Display Name">
-            <UInput
-              v-model="nameForm"
-              placeholder="Your name"
-              autofocus
-              @keydown.enter="submitName"
-            />
-          </UFormField>
-          <div class="flex justify-end gap-3">
-            <UButton
-              variant="outline"
-              color="neutral"
-              @click="showNameModal = false"
-            >
-              Cancel
-            </UButton>
-            <UButton
-              :loading="nameLoading"
-              :disabled="!nameForm.trim()"
-              @click="submitName"
-            >
-              Save
-            </UButton>
-          </div>
-        </div>
-      </template>
-    </UModal>
-
-    <!-- Change Email Modal -->
-    <UModal v-model:open="showEmailModal">
-      <template #content>
-        <div class="p-6 space-y-4">
-          <h3 class="text-lg font-semibold">
-            Change Email
-          </h3>
-          <UFormField label="New Email">
-            <UInput
-              v-model="emailForm.email"
-              type="email"
-              placeholder="new@example.com"
-              autofocus
-            />
-          </UFormField>
-          <UFormField label="Current Password">
-            <UInput
-              v-model="emailForm.password"
-              type="password"
-              placeholder="Enter your current password"
-              @keydown.enter="submitEmail"
-            />
-          </UFormField>
-          <div class="flex justify-end gap-3">
-            <UButton
-              variant="outline"
-              color="neutral"
-              @click="showEmailModal = false"
-            >
-              Cancel
-            </UButton>
-            <UButton
-              :loading="emailLoading"
-              :disabled="!emailForm.email.trim() || !emailForm.password"
-              @click="submitEmail"
-            >
-              Save
-            </UButton>
-          </div>
-        </div>
-      </template>
-    </UModal>
-
-    <!-- Change Password Modal -->
-    <UModal v-model:open="showPasswordModal">
-      <template #content>
-        <div class="p-6 space-y-4">
-          <h3 class="text-lg font-semibold">
-            Change Password
-          </h3>
-          <UFormField label="Current Password">
-            <UInput
-              v-model="passwordForm.oldPassword"
-              type="password"
-              placeholder="Current password"
-              autofocus
-            />
-          </UFormField>
-          <UFormField
-            label="New Password"
-            :error="passwordError"
-          >
-            <UInput
-              v-model="passwordForm.newPassword"
-              type="password"
-              placeholder="New password (min. 8 characters)"
-            />
-          </UFormField>
-          <UFormField
-            label="Confirm New Password"
-            :error="passwordError"
-          >
-            <UInput
-              v-model="passwordForm.confirmPassword"
-              type="password"
-              placeholder="Confirm new password"
-              @keydown.enter="submitPassword"
-            />
-          </UFormField>
-          <div class="flex justify-end gap-3">
-            <UButton
-              variant="outline"
-              color="neutral"
-              @click="showPasswordModal = false"
-            >
-              Cancel
-            </UButton>
-            <UButton
-              :loading="passwordLoading"
-              :disabled="!passwordForm.oldPassword || !passwordForm.newPassword || !passwordForm.confirmPassword || !!passwordError"
-              @click="submitPassword"
-            >
-              Save
-            </UButton>
-          </div>
-        </div>
-      </template>
-    </UModal>
   </div>
 </template>

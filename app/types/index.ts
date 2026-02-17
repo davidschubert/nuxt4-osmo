@@ -105,3 +105,30 @@ export interface SearchGroup {
   label: string
   items: SearchResult[]
 }
+
+// Admin user view (from server Users API, enriched with profile data)
+export interface AdminUser {
+  $id: string
+  name: string
+  email: string
+  emailVerification: boolean
+  status: boolean // true = active, false = blocked
+  labels: string[]
+  registration: string // ISO date
+  subscriptionStatus?: SubscriptionStatus
+  planType?: PlanType
+}
+
+// Notification for in-app notification panel
+export interface AppNotification {
+  $id: string
+  $createdAt: string
+  userId: string // recipient user ID ('*' = broadcast to all)
+  type: 'resource_added' | 'resource_updated' | 'user_registered' | 'profile_updated' | 'system'
+  title: string
+  message: string
+  avatarUrl?: string
+  actorName?: string
+  linkTo?: string // navigation target
+  read: boolean
+}

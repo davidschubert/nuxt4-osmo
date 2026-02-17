@@ -19,6 +19,12 @@ const navItems = computed(() => [
     icon: 'i-lucide-folder',
     to: '/admin/categories',
     active: route.path === '/admin/categories'
+  },
+  {
+    label: 'Users',
+    icon: 'i-lucide-users',
+    to: '/admin/users',
+    active: route.path === '/admin/users'
   }
 ])
 

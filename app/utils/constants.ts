@@ -7,7 +7,8 @@ export const APPWRITE = {
     RESOURCE_CODE: 'resource-code',
     CATEGORIES: 'categories',
     USER_PROFILES: 'user-profiles',
-    TEAMS: 'teams'
+    TEAMS: 'teams',
+    NOTIFICATIONS: 'notifications'
   },
   BUCKETS: {
     THUMBNAILS: 'thumbnails',
@@ -32,8 +33,8 @@ export const CATEGORIES = [
 
 // Extra sidebar navigation items (non-category)
 export const SIDEBAR_EXTRA_ITEMS = [
-  { slug: 'icons', name: 'Icons', icon: 'i-lucide-shapes', to: '/vault/icons' },
-  { slug: 'learn', name: 'Learn', icon: 'i-lucide-book-open', to: '/vault/learn' },
+  { slug: 'icons', name: 'Icons', icon: 'i-lucide-shapes', to: '/vault/icons', disabled: true, badge: 'Soon' },
+  { slug: 'learn', name: 'Learn', icon: 'i-lucide-book-open', to: '/vault/learn', disabled: true, badge: 'Soon' },
   { slug: 'easings', name: 'Easings', icon: 'i-lucide-spline', to: '/vault/easings', disabled: true, badge: 'Soon' }
 ] as const
 

@@ -4,18 +4,25 @@ import { SIDEBAR_EXTRA_ITEMS } from '~/utils/constants'
 const { categoriesWithCount } = useCategories()
 const route = useRoute()
 
-// Build sidebar navigation items from categories
-const categoryNavItems = computed(() => {
-  return categoriesWithCount.value.map(cat => ({
+// Sidebar always starts expanded (override cookie persistence)
+const sidebarCollapsed = ref(false)
+
+// Build sidebar navigation items — categories nested under "The Vault" collapsible
+const vaultNavItems = computed(() => [{
+  label: 'The Vault',
+  icon: 'i-lucide-archive',
+  to: '/vault',
+  defaultOpen: true,
+  children: categoriesWithCount.value.map(cat => ({
     label: cat.name,
     icon: cat.icon,
     to: `/vault?category=${cat.slug}`,
     badge: cat.count > 0 ? String(cat.count) : undefined,
     active: route.query.category === cat.slug
   }))
-})
+}])
 
-// Extra navigation items (Icons, Learn, Easings)
+// Extra navigation items (Icons, Learn, Easings — all "Soon")
 const extraNavItems = computed(() => {
   return SIDEBAR_EXTRA_ITEMS.map(item => ({
     label: item.name,
@@ -29,11 +36,9 @@ const extraNavItems = computed(() => {
 
 <template>
   <UDashboardSidebar
+    v-model:collapsed="sidebarCollapsed"
     collapsible
-    resizable
-    :min-size="200"
-    :default-size="260"
-    :max-size="320"
+    :default-size="18"
   >
     <template #header>
       <NuxtLink
@@ -45,14 +50,20 @@ const extraNavItems = computed(() => {
           class="size-5 text-primary"
         />
         <span class="font-bold text-sm truncate group-data-[collapsed]/sidebar:hidden">
-          The Vault
+          OSMO
         </span>
       </NuxtLink>
     </template>
 
     <UNavigationMenu
-      :items="categoryNavItems"
+      :items="vaultNavItems"
       orientation="vertical"
+      :ui="{
+        childList: 'ms-0 border-s-0',
+        childItem: 'ps-0 ms-0',
+        link: 'px-3 py-2 gap-2',
+        childLink: 'px-3 py-2 gap-2'
+      }"
     />
 
     <USeparator class="my-2" />
@@ -60,10 +71,15 @@ const extraNavItems = computed(() => {
     <UNavigationMenu
       :items="extraNavItems"
       orientation="vertical"
+      :ui="{
+        link: 'px-3 py-2 gap-2'
+      }"
     />
 
     <template #footer>
-      <AppUserMenu />
+      <div class="pt-2 border-t border-default">
+        <AppUserMenu />
+      </div>
     </template>
   </UDashboardSidebar>
 </template>
