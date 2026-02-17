@@ -94,7 +94,7 @@ const stats = [
       :links="heroLinks"
       :ui="{
         root: 'py-24 sm:py-32 md:py-40',
-        title: 'max-w-3xl mx-auto',
+        title: 'max-w-3xl mx-auto font-serif',
         description: 'max-w-2xl mx-auto'
       }"
     />

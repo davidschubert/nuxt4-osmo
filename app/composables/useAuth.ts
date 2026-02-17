@@ -336,13 +336,18 @@ export function useAuth() {
           github: OAuthProvider.Github,
           google: OAuthProvider.Google
         }
-        // OAuth redirects the browser – this call does not return
+        // Use createOAuth2Token (not createOAuth2Session) so the callback
+        // receives userId + secret as query params. This avoids third-party
+        // cookie issues where the session cookie set by Appwrite's domain
+        // is not available on our origin (localhost / custom domain).
+        // The /oauth/callback page will call account.createSession() to
+        // establish the session via the SDK's cookie-fallback mechanism.
         const config = useRuntimeConfig()
         const appUrl = config.public.appUrl as string
-        account.createOAuth2Session({
+        account.createOAuth2Token({
           provider: providerMap[provider] as string,
-          success: `${appUrl}/vault`,
-          failure: `${appUrl}/login`
+          success: `${appUrl}/oauth/callback`,
+          failure: `${appUrl}/login?error=oauth`
         })
       }
     } catch (error: unknown) {

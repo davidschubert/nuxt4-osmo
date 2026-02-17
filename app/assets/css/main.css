@@ -2,22 +2,67 @@
 @import "@nuxt/ui";
 
 @theme static {
-  --font-sans: 'Public Sans', sans-serif;
+  /* ── Fonts ─────────────────────────────────────────────── */
+  --font-sans: 'Public Sans', system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', 'Georgia', serif;
 
-  --color-green-50: #EFFDF5;
-  --color-green-100: #D9FBE8;
-  --color-green-200: #B3F5D1;
-  --color-green-300: #75EDAE;
-  --color-green-400: #00DC82;
-  --color-green-500: #00C16A;
-  --color-green-600: #00A155;
-  --color-green-700: #007F45;
-  --color-green-800: #016538;
-  --color-green-900: #0A5331;
-  --color-green-950: #052E16;
+  /* ── Primary: Lime/Chartreuse green (OSMO star accent) ── */
+  --color-green-50: #f7fee7;
+  --color-green-100: #ecfccb;
+  --color-green-200: #d9f99d;
+  --color-green-300: #bef264;
+  --color-green-400: #a3e635;
+  --color-green-500: #84cc16;
+  --color-green-600: #65a30d;
+  --color-green-700: #4d7c0f;
+  --color-green-800: #3f6212;
+  --color-green-900: #365314;
+  --color-green-950: #1a2e05;
+
+  /* ── Neutral: Warm grays (not blue-tinted slate) ──────── */
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e5e5e5;
+  --color-neutral-300: #d4d4d4;
+  --color-neutral-400: #a3a3a3;
+  --color-neutral-500: #737373;
+  --color-neutral-600: #525252;
+  --color-neutral-700: #404040;
+  --color-neutral-800: #262626;
+  --color-neutral-900: #171717;
+  --color-neutral-950: #0a0a0a;
 }
 
-/* Color mode transitions — smooth dark/light toggle */
+/* ── Global design tokens ─────────────────────────────────── */
+:root {
+  --ui-radius: 0.5rem; /* 8px — OSMO's moderate rounding */
+}
+
+/* ── Light mode surfaces ──────────────────────────────────── */
+/* OSMO light: content area is light gray, sidebar/navbar are white */
+:root {
+  --ui-bg: #f5f5f5;
+  --ui-bg-muted: #ffffff;
+  --ui-bg-elevated: #ffffff;
+  --ui-bg-accented: #e5e5e5;
+  --ui-border: #e5e5e5;
+  --ui-border-muted: #f0f0f0;
+  --ui-border-accented: #d4d4d4;
+}
+
+/* ── Dark mode surfaces (OSMO's signature dark UI) ────────── */
+/* OSMO dark: content area is darker, sidebar/navbar are slightly lighter */
+.dark {
+  --ui-bg: #141414;
+  --ui-bg-muted: #1a1a1a;
+  --ui-bg-elevated: #222222;
+  --ui-bg-accented: #2a2a2a;
+  --ui-border: #2a2a2a;
+  --ui-border-muted: #222222;
+  --ui-border-accented: #3a3a3a;
+}
+
+/* ── Color mode transitions — smooth dark/light toggle ────── */
 *,
 *::before,
 *::after {
@@ -26,7 +71,7 @@
   transition-timing-function: ease;
 }
 
-/* Page transitions */
+/* ── Page transitions ─────────────────────────────────────── */
 .page-enter-active,
 .page-leave-active {
   transition: opacity 150ms ease, transform 150ms ease;
@@ -42,7 +87,7 @@
   transform: translateY(-4px);
 }
 
-/* Layout transitions */
+/* ── Layout transitions ───────────────────────────────────── */
 .layout-enter-active,
 .layout-leave-active {
   transition: opacity 150ms ease;

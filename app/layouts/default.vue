@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const { isAuthenticated } = useAuth()
+
 const navLinks = [
   { label: 'Features', to: '/#features' },
   { label: 'Plans', to: '/plans' }
@@ -54,15 +56,23 @@ const footerLinks = [
 
       <template #right>
         <UColorModeButton />
+        <template v-if="!isAuthenticated">
+          <UButton
+            to="/login"
+            variant="ghost"
+            color="neutral"
+          >
+            Login
+          </UButton>
+          <UButton to="/plans">
+            Join
+          </UButton>
+        </template>
         <UButton
-          to="/login"
-          variant="ghost"
-          color="neutral"
+          v-else
+          to="/vault"
         >
-          Login
-        </UButton>
-        <UButton to="/register">
-          Get Started
+          Launch
         </UButton>
       </template>
     </UHeader>

@@ -4,7 +4,7 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/ui',
     '@nuxt/image',
-    '@nuxt/scripts',
+    '@nuxt/fonts',
     '@pinia/nuxt'
   ],
 
@@ -53,7 +53,8 @@ export default defineNuxtConfig({
     '/account': { ssr: false },
     '/checkout/**': { ssr: false },
     '/invite': { ssr: false },
-    '/verify-email': { ssr: false }
+    '/verify-email': { ssr: false },
+    '/oauth/**': { ssr: false }
   },
 
   compatibilityDate: '2025-01-15',

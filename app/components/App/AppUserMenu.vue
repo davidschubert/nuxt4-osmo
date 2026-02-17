@@ -11,6 +11,8 @@ const isDark = computed({
 })
 
 const subscriptionLabel = computed(() => {
+  if (user.value?.planType === 'lifetime') return 'Lifetime Member'
+  if (user.value?.planType === 'team') return 'Team Plan'
   switch (user.value?.subscriptionStatus) {
     case 'active':
       return 'Pro Member'
@@ -21,6 +23,12 @@ const subscriptionLabel = computed(() => {
     default:
       return 'Free Plan'
   }
+})
+
+const subscriptionBadgeColor = computed(() => {
+  if (user.value?.subscriptionStatus === 'active') return 'primary' as const
+  if (user.value?.subscriptionStatus === 'past_due') return 'warning' as const
+  return 'neutral' as const
 })
 
 const menuItems = computed(() => [
@@ -68,9 +76,14 @@ const menuItems = computed(() => [
       <p class="text-sm font-medium truncate">
         {{ user?.displayName }}
       </p>
-      <p class="text-xs text-muted truncate">
+      <UBadge
+        :color="subscriptionBadgeColor"
+        variant="subtle"
+        size="xs"
+        class="mt-0.5"
+      >
         {{ subscriptionLabel }}
-      </p>
+      </UBadge>
     </div>
     <UDropdownMenu :items="menuItems">
       <UButton

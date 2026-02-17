@@ -61,7 +61,7 @@ function clearCategory() {
         class="mb-4"
       />
       <div class="flex items-baseline gap-2 mb-6">
-        <h1 class="text-3xl md:text-4xl font-bold">
+        <h1 class="text-3xl md:text-4xl font-serif">
           {{ activeCategory.name }}
         </h1>
         <sup class="text-sm text-muted font-normal">{{ activeCategory.count }}</sup>
@@ -76,7 +76,7 @@ function clearCategory() {
       <p class="text-sm text-muted mb-2">
         {{ greeting }} <span class="inline-block">👋</span>
       </p>
-      <h1 class="text-4xl md:text-5xl font-bold mb-6">
+      <h1 class="text-4xl md:text-5xl font-serif mb-6">
         Welcome to<br>the Vault
       </h1>
 

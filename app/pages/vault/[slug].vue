@@ -148,7 +148,7 @@ const sanitizedNotes = computed(() => {
         <div class="space-y-8 min-w-0">
           <!-- Title + actions -->
           <div class="flex items-start justify-between gap-4">
-            <h1 class="text-2xl sm:text-3xl font-bold">
+            <h1 class="text-2xl sm:text-3xl font-serif">
               {{ resource.title }}
             </h1>
             <div class="flex items-center gap-1 shrink-0">
@@ -203,7 +203,7 @@ const sanitizedNotes = computed(() => {
 
             <!-- Documentation section -->
             <div class="space-y-4">
-              <h2 class="text-xl font-bold">
+              <h2 class="text-xl font-serif">
                 Documentation
               </h2>
 

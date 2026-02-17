@@ -39,7 +39,7 @@ const ariaLabel = computed(() => {
     class="group block focus-visible:outline-none"
     :aria-label="ariaLabel"
   >
-    <div class="rounded-xl overflow-hidden border border-default/50 transition-all duration-200 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 group-focus-visible:ring-2 group-focus-visible:ring-primary group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-default">
+    <div class="rounded-xl overflow-hidden border border-default/30 transition-all duration-200 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 group-focus-visible:ring-2 group-focus-visible:ring-primary group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-default">
       <!-- Thumbnail area -->
       <div
         class="relative aspect-[4/3] flex items-center justify-center overflow-hidden"

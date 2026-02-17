@@ -1,20 +1,11 @@
 <script setup lang="ts">
 import { APP } from '~/utils/constants'
 
-// Initialize auth state on app startup (client-only)
+// SDK is initialized by plugins/appwrite.client.ts (runs before middleware).
+// Auth init is triggered by the auth middleware on protected routes.
+// For unprotected routes (landing page), initialize auth lazily on mount.
 const { init: initAuth } = useAuth()
-onMounted(async () => {
-  // Load the Appwrite SDK lazily (browser-only, SSR-safe)
-  await initAppwriteSdk()
-
-  // Ping Appwrite to verify connection (required for initial setup)
-  try {
-    const { client } = useAppwrite()
-    await client.ping()
-    console.log('Appwrite connection verified')
-  } catch {
-    console.warn('Appwrite ping failed – running in mock mode')
-  }
+onMounted(() => {
   initAuth()
 })
 
