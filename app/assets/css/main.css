@@ -71,6 +71,16 @@
   transition-timing-function: ease;
 }
 
+/* ── Reduced motion: respect user preference ─────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
 /* ── Page transitions ─────────────────────────────────────── */
 .page-enter-active,
 .page-leave-active {

@@ -53,8 +53,9 @@ export function useResources() {
 
           allDocs = allDocs.concat(docs)
           hasMore = result.documents.length === 100
-          if (result.documents.length > 0) {
-            lastId = result.documents[result.documents.length - 1].$id
+          const lastDoc = result.documents[result.documents.length - 1]
+          if (lastDoc) {
+            lastId = lastDoc.$id
           }
         }
 

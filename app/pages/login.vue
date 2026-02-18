@@ -9,7 +9,9 @@ definePageMeta({
 
 useSeoMeta({
   title: 'Login - OSMO',
-  description: 'Sign in to your Vault account to access your resources.'
+  description: 'Sign in to your Vault account to access your resources.',
+  ogTitle: 'Login - OSMO',
+  ogDescription: 'Sign in to your Vault account to access your resources.'
 })
 
 const { login, loginWithOAuth, loading } = useAuth()

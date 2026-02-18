@@ -42,11 +42,15 @@ export default defineEventHandler(async (event) => {
         APPWRITE_DB.COLLECTIONS.USER_PROFILES,
         [Q.equal('userId', userIds), Q.limit(100)]
       )
+      interface ProfileDoc { userId: string, subscriptionStatus?: string, planType?: string }
       profileMap = Object.fromEntries(
-        profiles.documents.map((p: { userId: string, subscriptionStatus?: string, planType?: string }) => [
-          p.userId,
-          { subscriptionStatus: p.subscriptionStatus, planType: p.planType }
-        ])
+        profiles.documents.map((p) => {
+          const profile = p as unknown as ProfileDoc
+          return [
+            profile.userId,
+            { subscriptionStatus: profile.subscriptionStatus, planType: profile.planType }
+          ]
+        })
       )
     } catch {
       // Profiles collection may not exist yet — continue without profile data

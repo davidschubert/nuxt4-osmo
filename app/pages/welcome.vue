@@ -4,7 +4,8 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Welcome - OSMO'
+  title: 'Welcome - OSMO',
+  robots: 'noindex'
 })
 </script>
 

@@ -43,7 +43,7 @@ async function ensureProfile(
           userId: user.$id,
           displayName: user.name || user.email?.split('@')[0] || 'User',
           subscriptionStatus: 'free'
-        },
+        } as Record<string, unknown>,
         permissions: [
           Permission.read(Role.user(user.$id)),
           Permission.update(Role.user(user.$id))
@@ -289,7 +289,8 @@ export function useAuth() {
         await navigateTo('/vault')
       } else {
         const { account, OAuthProvider } = useAppwrite()
-        const providerMap: Record<string, string> = {
+        type OAuthProviderType = typeof OAuthProvider[keyof typeof OAuthProvider]
+        const providerMap: Record<string, OAuthProviderType> = {
           github: OAuthProvider.Github,
           google: OAuthProvider.Google
         }
@@ -302,7 +303,7 @@ export function useAuth() {
         const config = useRuntimeConfig()
         const appUrl = config.public.appUrl as string
         account.createOAuth2Token({
-          provider: providerMap[provider] as string,
+          provider: providerMap[provider]!,
           success: `${appUrl}/oauth/callback`,
           failure: `${appUrl}/login?error=oauth`
         })

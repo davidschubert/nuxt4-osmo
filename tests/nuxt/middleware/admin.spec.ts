@@ -1,7 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { mockUser } from '~/utils/mock-data'
+import type { RouteLocationNormalized } from 'vue-router'
 
 import adminMiddleware from '~/middleware/admin'
+
+const mockRoute = (path: string) => ({ path }) as unknown as RouteLocationNormalized
 
 describe('admin middleware', () => {
   beforeEach(() => {
@@ -15,8 +18,8 @@ describe('admin middleware', () => {
     authStore.setInitialized()
 
     await adminMiddleware(
-      { path: '/admin' } as any,
-      { path: '/' } as any
+      mockRoute('/admin'),
+      mockRoute('/')
     )
 
     // User remains unauthenticated — middleware would redirect
@@ -30,8 +33,8 @@ describe('admin middleware', () => {
     authStore.setInitialized()
 
     await adminMiddleware(
-      { path: '/admin' } as any,
-      { path: '/' } as any
+      mockRoute('/admin'),
+      mockRoute('/')
     )
 
     // User is authenticated but not admin
@@ -45,8 +48,8 @@ describe('admin middleware', () => {
     authStore.setInitialized()
 
     const result = await adminMiddleware(
-      { path: '/admin' } as any,
-      { path: '/' } as any
+      mockRoute('/admin'),
+      mockRoute('/')
     )
 
     // Admin user: middleware returns undefined (no redirect)

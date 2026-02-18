@@ -1,7 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { mockUser } from '~/utils/mock-data'
+import type { RouteLocationNormalized } from 'vue-router'
 
 import authMiddleware from '~/middleware/auth'
+
+const mockRoute = (path: string) => ({ path }) as unknown as RouteLocationNormalized
 
 describe('auth middleware', () => {
   beforeEach(() => {
@@ -17,8 +20,8 @@ describe('auth middleware', () => {
     // In Nuxt test env, navigateTo may not return a value,
     // so we verify via the store that the user remains unauthenticated
     await authMiddleware(
-      { path: '/vault' } as any,
-      { path: '/' } as any
+      mockRoute('/vault'),
+      mockRoute('/')
     )
 
     expect(authStore.isAuthenticated).toBe(false)
@@ -30,8 +33,8 @@ describe('auth middleware', () => {
     authStore.setInitialized()
 
     const result = await authMiddleware(
-      { path: '/vault' } as any,
-      { path: '/' } as any
+      mockRoute('/vault'),
+      mockRoute('/')
     )
 
     // Authenticated user: middleware returns undefined (no redirect)
@@ -43,8 +46,8 @@ describe('auth middleware', () => {
     expect(authStore.initialized).toBe(false)
 
     await authMiddleware(
-      { path: '/vault' } as any,
-      { path: '/' } as any
+      mockRoute('/vault'),
+      mockRoute('/')
     )
 
     // init() should have been called, which sets initialized to true

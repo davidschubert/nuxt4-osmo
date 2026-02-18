@@ -5,7 +5,8 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'OSMO - Browse Resources'
+  title: 'OSMO - Browse Resources',
+  description: 'Browse a curated library of code snippets, UI components, and animations. Filter by category, search, and copy code in seconds.'
 })
 
 const route = useRoute()
@@ -126,7 +127,7 @@ function clearCategory() {
           icon="i-lucide-x"
           variant="link"
           color="primary"
-          size="2xs"
+          size="xs"
           class="ml-1"
           @click="clearCategory"
         />
@@ -142,7 +143,7 @@ function clearCategory() {
           icon="i-lucide-x"
           variant="link"
           color="neutral"
-          size="2xs"
+          size="xs"
           class="ml-1"
           @click="searchQuery = ''"
         />

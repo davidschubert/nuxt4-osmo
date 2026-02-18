@@ -49,18 +49,18 @@ describe('useSearch', () => {
   it('searchGroups resource items have correct paths', () => {
     const { searchGroups } = useSearch()
     const resourceGroup = searchGroups.value.find(g => g.id === 'resources')!
-    const firstItem = resourceGroup.items[0]
-    expect(firstItem.to).toBe(`/vault/${mockResources[0].slug}`)
-    expect(firstItem.title).toBe(mockResources[0].title)
-    expect(firstItem.id).toBe(mockResources[0].$id)
+    const firstItem = resourceGroup.items[0]!
+    expect(firstItem.to).toBe(`/vault/${mockResources[0]!.slug}`)
+    expect(firstItem.title).toBe(mockResources[0]!.title)
+    expect(firstItem.id).toBe(mockResources[0]!.$id)
   })
 
   it('searchGroups category items have correct query paths', () => {
     const { searchGroups } = useSearch()
     const categoryGroup = searchGroups.value.find(g => g.id === 'categories')!
-    const firstCat = categoryGroup.items[0]
-    expect(firstCat.to).toBe(`/vault?category=${mockCategories[0].slug}`)
-    expect(firstCat.title).toBe(mockCategories[0].name)
+    const firstCat = categoryGroup.items[0]!
+    expect(firstCat.to).toBe(`/vault?category=${mockCategories[0]!.slug}`)
+    expect(firstCat.title).toBe(mockCategories[0]!.name)
   })
 
   it('searchGroups pages group has vault, plans, account', () => {
@@ -74,10 +74,10 @@ describe('useSearch', () => {
 
   it('commandPaletteGroups transforms title to label', () => {
     const { commandPaletteGroups } = useSearch()
-    const firstGroup = commandPaletteGroups.value[0]
+    const firstGroup = commandPaletteGroups.value[0]!
     expect(firstGroup.label).toBe('Resources')
-    expect(firstGroup.items[0].label).toBe(mockResources[0].title)
+    expect(firstGroup.items[0]!.label).toBe(mockResources[0]!.title)
     // Should not have 'title' property
-    expect('title' in firstGroup.items[0]).toBe(false)
+    expect('title' in firstGroup.items[0]!).toBe(false)
   })
 })

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { mapStripeStatus } from '../../../../server/utils/stripe'
 
 // --- Mock Nitro globals and server utils ---
 
@@ -42,15 +43,14 @@ vi.stubGlobal('readRawBody', mockReadRawBody)
 const mockGetHeader = vi.fn()
 vi.stubGlobal('getHeader', mockGetHeader)
 
-vi.stubGlobal('createError', (opts: { statusCode: number; statusMessage: string }) => {
+vi.stubGlobal('createError', (opts: { statusCode: number, statusMessage: string }) => {
   const err = new Error(opts.statusMessage) as Error & { statusCode: number }
   err.statusCode = opts.statusCode
   return err
 })
-vi.stubGlobal('defineEventHandler', (handler: Function) => handler)
+vi.stubGlobal('defineEventHandler', (handler: (...args: unknown[]) => unknown) => handler)
 
 // Import mapStripeStatus so it's available as a global (Nitro auto-import)
-import { mapStripeStatus } from '../../../../server/utils/stripe'
 vi.stubGlobal('mapStripeStatus', mapStripeStatus)
 
 // Import the handler after all globals are stubbed

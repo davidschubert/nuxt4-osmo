@@ -5,7 +5,8 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Account - OSMO'
+  title: 'Account - OSMO',
+  robots: 'noindex'
 })
 
 const route = useRoute()

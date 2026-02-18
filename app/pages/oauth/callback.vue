@@ -11,6 +11,11 @@ definePageMeta({
   layout: 'default'
 })
 
+useSeoMeta({
+  title: 'Logging in... - OSMO',
+  robots: 'noindex, nofollow'
+})
+
 const route = useRoute()
 const toast = useToast()
 
@@ -63,7 +68,7 @@ onMounted(async () => {
             userId: rawUser.$id,
             displayName: rawUser.name || rawUser.email?.split('@')[0] || 'User',
             subscriptionStatus: 'free'
-          },
+          } as Record<string, unknown>,
           permissions: [
             Permission.read(Role.user(rawUser.$id)),
             Permission.update(Role.user(rawUser.$id))

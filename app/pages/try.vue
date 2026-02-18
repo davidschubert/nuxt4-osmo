@@ -9,7 +9,9 @@ definePageMeta({
 
 useSeoMeta({
   title: 'Try - OSMO',
-  description: 'Create your free OSMO account and start exploring resources.'
+  description: 'Create your free OSMO account and start exploring resources.',
+  ogTitle: 'Try OSMO Free',
+  ogDescription: 'Create your free OSMO account and start exploring resources.'
 })
 
 const route = useRoute()

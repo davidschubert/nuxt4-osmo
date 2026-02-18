@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { mockUser } from '~/utils/mock-data'
+import type { RouteLocationNormalized } from 'vue-router'
 
 import guestMiddleware from '~/middleware/guest'
+
+const mockRoute = (path: string, query: Record<string, string> = {}) =>
+  ({ path, query }) as unknown as RouteLocationNormalized
 
 describe('guest middleware', () => {
   beforeEach(() => {
@@ -15,8 +19,8 @@ describe('guest middleware', () => {
     authStore.setInitialized()
 
     const result = await guestMiddleware(
-      { path: '/login', query: {} } as any,
-      { path: '/' } as any
+      mockRoute('/login'),
+      mockRoute('/')
     )
 
     // Guest user on login page: no redirect
@@ -30,8 +34,8 @@ describe('guest middleware', () => {
 
     // Middleware would redirect, but navigateTo returns void in test env
     await guestMiddleware(
-      { path: '/login', query: {} } as any,
-      { path: '/' } as any
+      mockRoute('/login'),
+      mockRoute('/')
     )
 
     // Verify the user is indeed authenticated (middleware should redirect)
@@ -44,8 +48,8 @@ describe('guest middleware', () => {
     authStore.setInitialized()
 
     const result = await guestMiddleware(
-      { path: '/register', query: { verify: 'pending' } } as any,
-      { path: '/' } as any
+      mockRoute('/register', { verify: 'pending' }),
+      mockRoute('/')
     )
 
     expect(result).toBeUndefined()

@@ -42,17 +42,17 @@ export function renderMarkdown(markdown: string): string {
     // Check if this line is a heading
     const h4 = line.match(/^### (.+)$/)
     if (h4) {
-      return `<h4 class="text-base font-semibold mt-4 mb-2">${escapeHtml(h4[1])}</h4>`
+      return `<h4 class="text-base font-semibold mt-4 mb-2">${escapeHtml(h4[1] ?? '')}</h4>`
     }
 
     const h3 = line.match(/^## (.+)$/)
     if (h3) {
-      return `<h3 class="text-lg font-semibold mt-6 mb-2">${escapeHtml(h3[1])}</h3>`
+      return `<h3 class="text-lg font-semibold mt-6 mb-2">${escapeHtml(h3[1] ?? '')}</h3>`
     }
 
     const h2 = line.match(/^# (.+)$/)
     if (h2) {
-      return `<h2 class="text-xl font-bold mt-6 mb-3">${escapeHtml(h2[1])}</h2>`
+      return `<h2 class="text-xl font-bold mt-6 mb-3">${escapeHtml(h2[1] ?? '')}</h2>`
     }
 
     // Empty lines
