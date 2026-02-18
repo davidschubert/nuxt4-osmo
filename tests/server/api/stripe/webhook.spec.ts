@@ -31,12 +31,17 @@ vi.stubGlobal('useStripe', () => ({
   }
 }))
 
-vi.stubGlobal('useRuntimeConfig', () => ({
+const mockUseRuntimeConfig = vi.fn(() => ({
   stripeWebhookSecret: 'whsec_test_secret'
 }))
+vi.stubGlobal('useRuntimeConfig', mockUseRuntimeConfig)
 
-vi.stubGlobal('readRawBody', vi.fn())
-vi.stubGlobal('getHeader', vi.fn())
+const mockReadRawBody = vi.fn()
+vi.stubGlobal('readRawBody', mockReadRawBody)
+
+const mockGetHeader = vi.fn()
+vi.stubGlobal('getHeader', mockGetHeader)
+
 vi.stubGlobal('createError', (opts: { statusCode: number; statusMessage: string }) => {
   const err = new Error(opts.statusMessage) as Error & { statusCode: number }
   err.statusCode = opts.statusCode
@@ -56,27 +61,30 @@ describe('Stripe Webhook Handler', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(globalThis.readRawBody).mockResolvedValue('raw-body')
-    vi.mocked(globalThis.getHeader).mockReturnValue('sig_test')
+    mockReadRawBody.mockResolvedValue('raw-body')
+    mockGetHeader.mockReturnValue('sig_test')
+    mockUseRuntimeConfig.mockReturnValue({
+      stripeWebhookSecret: 'whsec_test_secret'
+    })
   })
 
   describe('validation', () => {
     it('throws 500 when webhook secret is missing', async () => {
-      vi.mocked(globalThis.useRuntimeConfig).mockReturnValueOnce({
+      mockUseRuntimeConfig.mockReturnValueOnce({
         stripeWebhookSecret: ''
-      } as unknown as ReturnType<typeof useRuntimeConfig>)
+      })
 
       await expect(handler(fakeEvent)).rejects.toThrow('Stripe webhook secret is not configured')
     })
 
     it('throws 400 when body is missing', async () => {
-      vi.mocked(globalThis.readRawBody).mockResolvedValueOnce(null)
+      mockReadRawBody.mockResolvedValueOnce(null)
 
       await expect(handler(fakeEvent)).rejects.toThrow('Missing request body')
     })
 
     it('throws 400 when stripe-signature header is missing', async () => {
-      vi.mocked(globalThis.getHeader).mockReturnValueOnce(undefined)
+      mockGetHeader.mockReturnValueOnce(undefined)
 
       await expect(handler(fakeEvent)).rejects.toThrow('Missing stripe-signature header')
     })

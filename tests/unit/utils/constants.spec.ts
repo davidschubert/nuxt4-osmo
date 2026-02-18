@@ -43,7 +43,7 @@ describe('constants', () => {
 
   describe('APP', () => {
     it('has correct app name', () => {
-      expect(APP.NAME).toBe('The Vault')
+      expect(APP.NAME).toBe('OSMO')
     })
 
     it('has description and URL', () => {
