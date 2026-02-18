@@ -158,12 +158,13 @@ type RegistrationSchema = z.output<typeof registrationSchema>
 
 async function onRegister(payload: FormSubmitEvent<RegistrationSchema>) {
   const fullName = `${payload.data.firstName} ${payload.data.lastName}`
+  // Pass redirectTo: false to prevent register() from navigating away.
+  // The isAuthenticated watcher will advance to step 2 (payment) automatically.
   await register({
     name: fullName,
     email: payload.data.email,
     password: payload.data.password
-  })
-  // After registration, auth state is updated and watcher will advance to step 2
+  }, { redirectTo: false })
 }
 
 // --- Step 2: Stripe Embedded Checkout ---

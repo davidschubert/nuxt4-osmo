@@ -15,6 +15,11 @@ interface RegisterParams {
   password: string
 }
 
+interface RegisterOptions {
+  /** Override the default post-registration redirect. Set to `false` to skip navigation entirely. */
+  redirectTo?: string | false
+}
+
 /**
  * Ensure a user-profiles document exists for the given user.
  * Creates one if it doesn't exist (e.g. first OAuth login).
@@ -156,7 +161,7 @@ export function useAuth() {
   /**
    * Register a new account
    */
-  async function register({ name, email, password }: RegisterParams) {
+  async function register({ name, email, password }: RegisterParams, options?: RegisterOptions) {
     authStore.setLoading(true)
     try {
       if (MOCK_MODE) {
@@ -176,7 +181,10 @@ export function useAuth() {
           localStorage.setItem('vault-mock-session', JSON.stringify(user))
         }
         toast.add({ title: 'Welcome!', description: 'Your account has been created.' })
-        await navigateTo('/vault')
+        const mockRedirect = options?.redirectTo
+        if (mockRedirect !== false) {
+          await navigateTo(mockRedirect || '/vault')
+        }
       } else {
         const { account, databases, ID, Permission, Role } = useAppwrite()
         // Create Appwrite account
@@ -203,10 +211,13 @@ export function useAuth() {
         }
 
         toast.add({
-          title: 'Check your email!',
-          description: 'We sent you a verification link. Please verify your email to continue.'
+          title: 'Account created!',
+          description: 'Your account is ready.'
         })
-        await navigateTo('/welcome')
+        const redirect = options?.redirectTo
+        if (redirect !== false) {
+          await navigateTo(redirect || '/welcome')
+        }
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Registration failed. Please try again.'
