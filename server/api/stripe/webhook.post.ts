@@ -2,27 +2,6 @@ import type Stripe from 'stripe'
 import type { Databases } from 'node-appwrite'
 
 /**
- * Map Stripe subscription status to our SubscriptionStatus type.
- */
-function mapStripeStatus(
-  status: Stripe.Subscription.Status
-): 'free' | 'active' | 'canceled' | 'past_due' {
-  switch (status) {
-    case 'active':
-    case 'trialing':
-      return 'active'
-    case 'past_due':
-      return 'past_due'
-    case 'canceled':
-    case 'unpaid':
-    case 'incomplete_expired':
-      return 'canceled'
-    default:
-      return 'free'
-  }
-}
-
-/**
  * Find the Appwrite userId from a Stripe customerId by querying UserProfiles.
  */
 async function resolveUserIdFromCustomer(

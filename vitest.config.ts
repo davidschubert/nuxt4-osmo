@@ -4,12 +4,29 @@ import { defineVitestProject } from '@nuxt/test-utils/config'
 
 export default defineConfig({
   test: {
+    coverage: {
+      provider: 'v8',
+      include: ['app/**/*.{ts,vue}', 'server/**/*.ts'],
+      exclude: ['app/utils/mock-data.ts', 'app/utils/mock-mode.ts']
+    },
     projects: [
       // Plain unit tests – no Nuxt runtime, fast Node environment
       {
         test: {
           name: 'unit',
           include: ['tests/unit/**/*.{test,spec}.ts']
+        },
+        resolve: {
+          alias: {
+            '~': fileURLToPath(new URL('./app', import.meta.url))
+          }
+        }
+      },
+      // Server-side unit tests – no Nuxt runtime, Node environment with server aliases
+      {
+        test: {
+          name: 'server',
+          include: ['tests/server/**/*.{test,spec}.ts']
         },
         resolve: {
           alias: {

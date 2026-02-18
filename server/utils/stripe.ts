@@ -25,3 +25,24 @@ export function useStripe(): Stripe {
 
   return stripeInstance
 }
+
+/**
+ * Map Stripe subscription status to our internal SubscriptionStatus type.
+ */
+export function mapStripeStatus(
+  status: Stripe.Subscription.Status
+): 'free' | 'active' | 'canceled' | 'past_due' {
+  switch (status) {
+    case 'active':
+    case 'trialing':
+      return 'active'
+    case 'past_due':
+      return 'past_due'
+    case 'canceled':
+    case 'unpaid':
+    case 'incomplete_expired':
+      return 'canceled'
+    default:
+      return 'free'
+  }
+}
