@@ -14,8 +14,7 @@ useSeoMeta({
 })
 
 const { isAuthenticated, isSubscribed } = useAuth()
-const { startCheckout, openPortal, checkoutLoading } = useSubscription()
-const config = useRuntimeConfig()
+const { openPortal, checkoutLoading } = useSubscription()
 
 // Tab state: 'individuals' or 'teams'
 const activeTab = ref('individuals')
@@ -30,38 +29,28 @@ const isYearly = ref(false)
 
 // --- CTA Handlers ---
 function handleMemberClick() {
-  if (!isAuthenticated.value) {
-    navigateTo('/try')
-  } else if (isSubscribed.value) {
+  if (isSubscribed.value) {
     openPortal()
   } else {
-    const priceId = isYearly.value
-      ? config.public.stripeSoloYearlyPriceId as string
-      : config.public.stripeSoloQuarterlyPriceId as string
-    startCheckout(priceId, 'subscription')
+    const billing = isYearly.value ? 'yearly' : 'quarterly'
+    navigateTo(`/plans/subscription?billing=${billing}`)
   }
 }
 
 function handleLifetimeClick() {
-  if (!isAuthenticated.value) {
-    navigateTo('/try')
-  } else if (isSubscribed.value) {
+  if (isSubscribed.value) {
     openPortal()
   } else {
-    startCheckout(config.public.stripeLifetimePriceId as string, 'payment')
+    navigateTo('/plans/lifetime')
   }
 }
 
 function handleTeamClick() {
-  if (!isAuthenticated.value) {
-    navigateTo('/try')
-  } else if (isSubscribed.value) {
+  if (isSubscribed.value) {
     openPortal()
   } else {
-    const priceId = isYearly.value
-      ? config.public.stripeTeamYearlyPriceId as string
-      : config.public.stripeTeamQuarterlyPriceId as string
-    startCheckout(priceId, 'subscription')
+    const billing = isYearly.value ? 'yearly' : 'quarterly'
+    navigateTo(`/plans/team?billing=${billing}`)
   }
 }
 

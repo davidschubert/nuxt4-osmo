@@ -34,6 +34,7 @@ export default defineNuxtConfig({
     public: {
       appwriteEndpoint: 'https://cloud.appwrite.io/v1',
       appwriteProject: '',
+      stripePublishableKey: '',
       stripeSoloQuarterlyPriceId: '',
       stripeSoloYearlyPriceId: '',
       stripeTeamQuarterlyPriceId: '',
@@ -52,6 +53,7 @@ export default defineNuxtConfig({
     '/admin/**': { ssr: false },
     '/account': { ssr: false },
     '/checkout/**': { ssr: false },
+    '/plans/**': { ssr: false },
     '/invite': { ssr: false },
     '/verify-email': { ssr: false },
     '/oauth/**': { ssr: false }
