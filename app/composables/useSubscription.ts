@@ -8,74 +8,15 @@ export function useSubscription() {
   const portalLoading = ref(false)
 
   /**
-   * Start Stripe Checkout flow.
-   * Redirects the browser to Stripe's hosted checkout page.
-   * In mock mode, immediately upgrades the user to active.
+   * Navigate to the embedded checkout flow.
+   * Replaces the old Stripe Hosted Checkout redirect.
    *
-   * @param priceId - Stripe Price ID to checkout
+   * @param _priceId - Deprecated, plan is selected via URL
    * @param mode - Checkout mode: 'subscription' for recurring, 'payment' for one-time (Lifetime)
    */
-  async function startCheckout(priceId?: string, mode: 'subscription' | 'payment' = 'subscription') {
-    const user = authStore.user
-    if (!user) {
-      toast.add({
-        title: 'Login required',
-        description: 'Please log in to subscribe.',
-        color: 'warning'
-      })
-      await navigateTo('/login')
-      return
-    }
-
-    if (MOCK_MODE) {
-      // Simulate checkout in mock mode
-      checkoutLoading.value = true
-      await new Promise(resolve => setTimeout(resolve, 500))
-      authStore.setUser({
-        ...user,
-        subscriptionStatus: 'active',
-        stripeCustomerId: 'cus_mock_123',
-        stripeSubscriptionId: mode === 'subscription' ? 'sub_mock_123' : undefined,
-        subscribedAt: new Date().toISOString(),
-        planType: mode === 'payment' ? 'lifetime' : 'solo'
-      })
-      if (import.meta.client) {
-        localStorage.setItem('vault-mock-session', JSON.stringify(authStore.user))
-      }
-      checkoutLoading.value = false
-      toast.add({
-        title: 'Subscribed!',
-        description: 'Mock checkout complete. You now have full access.'
-      })
-      await navigateTo('/checkout/success')
-      return
-    }
-
-    checkoutLoading.value = true
-    try {
-      const response = await $fetch<{ url: string }>('/api/stripe/checkout', {
-        method: 'POST',
-        body: {
-          userId: user.userId,
-          userEmail: user.email,
-          priceId,
-          checkoutMode: mode
-        }
-      })
-
-      if (response.url) {
-        window.location.href = response.url
-      }
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Failed to start checkout'
-      toast.add({
-        title: 'Checkout failed',
-        description: message,
-        color: 'error'
-      })
-    } finally {
-      checkoutLoading.value = false
-    }
+  async function startCheckout(_priceId?: string, mode: 'subscription' | 'payment' = 'subscription') {
+    const planSlug = mode === 'payment' ? 'lifetime' : 'subscription'
+    await navigateTo(`/plans/${planSlug}`)
   }
 
   /**

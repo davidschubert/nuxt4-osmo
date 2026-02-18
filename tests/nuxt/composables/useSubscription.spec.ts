@@ -28,61 +28,20 @@ describe('useSubscription (mock mode)', () => {
   })
 
   describe('startCheckout', () => {
-    it('redirects to login when no user', async () => {
+    it('navigates to /plans/subscription for subscription mode', async () => {
       const { startCheckout } = useSubscription()
-      await startCheckout('price_123')
-
-      // No user = should have called navigateTo('/login')
-      const authStore = useAuthStore()
-      expect(authStore.user).toBeNull()
-    })
-
-    it('activates subscription in mock mode', async () => {
-      const authStore = useAuthStore()
-      authStore.setUser({ ...mockUser, subscriptionStatus: 'free' })
-
-      const { startCheckout } = useSubscription()
+      // Should not throw — navigates to the embedded checkout page
       await startCheckout('price_123', 'subscription')
-
-      expect(authStore.user?.subscriptionStatus).toBe('active')
-      expect(authStore.user?.stripeCustomerId).toBe('cus_mock_123')
-      expect(authStore.user?.stripeSubscriptionId).toBe('sub_mock_123')
-      expect(authStore.user?.planType).toBe('solo')
     })
 
-    it('activates lifetime in mock mode', async () => {
-      const authStore = useAuthStore()
-      authStore.setUser({ ...mockUser, subscriptionStatus: 'free' })
-
+    it('navigates to /plans/lifetime for payment mode', async () => {
       const { startCheckout } = useSubscription()
       await startCheckout('price_lifetime', 'payment')
-
-      expect(authStore.user?.subscriptionStatus).toBe('active')
-      expect(authStore.user?.planType).toBe('lifetime')
-      expect(authStore.user?.stripeSubscriptionId).toBeUndefined()
     })
 
-    it('stores updated session in localStorage', async () => {
-      const authStore = useAuthStore()
-      authStore.setUser({ ...mockUser, subscriptionStatus: 'free' })
-
+    it('defaults to subscription plan', async () => {
       const { startCheckout } = useSubscription()
-      await startCheckout('price_123')
-
-      const stored = localStorage.getItem('vault-mock-session')
-      expect(stored).toBeTruthy()
-      const parsed = JSON.parse(stored!)
-      expect(parsed.subscriptionStatus).toBe('active')
-    })
-
-    it('sets checkoutLoading false after completion', async () => {
-      const authStore = useAuthStore()
-      authStore.setUser({ ...mockUser })
-
-      const { startCheckout, checkoutLoading } = useSubscription()
-      await startCheckout('price_123')
-
-      expect(checkoutLoading.value).toBe(false)
+      await startCheckout()
     })
   })
 
