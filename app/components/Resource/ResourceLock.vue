@@ -4,13 +4,12 @@ defineProps<{
 }>()
 
 const { isAuthenticated } = useAuth()
-const { startCheckout, checkoutLoading } = useSubscription()
 
 function handleUpgrade() {
   if (!isAuthenticated.value) {
-    navigateTo('/try')
+    navigateTo('/plans/subscription')
   } else {
-    startCheckout()
+    navigateTo('/plans/subscription')
   }
 }
 </script>
@@ -38,7 +37,6 @@ function handleUpgrade() {
           label="Upgrade to Pro"
           trailing-icon="i-lucide-arrow-right"
           size="lg"
-          :loading="checkoutLoading"
           @click="handleUpgrade"
         />
         <UButton

@@ -9,8 +9,8 @@ useSeoMeta({
 })
 
 const route = useRoute()
-const { refreshStatus } = useSubscription()
-const { isSubscribed } = useAuth()
+const { refreshStatus, isMockMode } = useSubscription()
+const { isSubscribed, user } = useAuth()
 
 const sessionId = computed(() => route.query.session_id as string)
 const status = ref<'loading' | 'complete' | 'processing' | 'failed'>('loading')
@@ -20,6 +20,13 @@ const customerEmail = ref('')
 async function checkStatus() {
   if (!sessionId.value) {
     status.value = 'failed'
+    return
+  }
+
+  // Mock mode: auth store was already updated by [plan].vue — show success immediately
+  if (isMockMode) {
+    customerEmail.value = user.value?.email || ''
+    status.value = 'complete'
     return
   }
 

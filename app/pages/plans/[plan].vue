@@ -175,10 +175,26 @@ let checkoutInstance: { destroy: () => void } | null = null
 async function mountStripeCheckout() {
   if (!user.value || !plan.value || checkoutMounted.value) return
 
-  // Mock mode: simulate checkout
+  // Mock mode: simulate checkout locally (no Stripe redirect)
   if (isMockMode) {
-    const { startCheckout } = useSubscription()
-    await startCheckout(plan.value.getPriceId(billing.value), plan.value.mode)
+    checkoutLoading.value = true
+    await new Promise(resolve => setTimeout(resolve, 800))
+    const authStore = useAuthStore()
+    if (authStore.user) {
+      authStore.setUser({
+        ...authStore.user,
+        subscriptionStatus: 'active',
+        stripeCustomerId: 'cus_mock_123',
+        stripeSubscriptionId: plan.value.mode === 'subscription' ? 'sub_mock_123' : undefined,
+        subscribedAt: new Date().toISOString(),
+        planType: plan.value.mode === 'payment' ? 'lifetime' : 'solo'
+      })
+      if (import.meta.client) {
+        localStorage.setItem('vault-mock-session', JSON.stringify(authStore.user))
+      }
+    }
+    checkoutLoading.value = false
+    await navigateTo('/checkout/return?session_id=mock_session')
     return
   }
 
