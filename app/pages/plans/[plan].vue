@@ -173,29 +173,31 @@ const checkoutError = ref('')
 const checkoutMounted = ref(false)
 let checkoutInstance: { destroy: () => void } | null = null
 
+// Mock checkout: simulate payment completion and redirect to success
+async function completeMockCheckout() {
+  const authStore = useAuthStore()
+  if (authStore.user && plan.value) {
+    authStore.setUser({
+      ...authStore.user,
+      subscriptionStatus: 'active',
+      stripeCustomerId: 'cus_mock_123',
+      stripeSubscriptionId: plan.value.mode === 'subscription' ? 'sub_mock_123' : undefined,
+      subscribedAt: new Date().toISOString(),
+      planType: plan.value.mode === 'payment' ? 'lifetime' : 'solo'
+    })
+    if (import.meta.client) {
+      localStorage.setItem('vault-mock-session', JSON.stringify(authStore.user))
+    }
+  }
+  await navigateTo('/checkout/return?session_id=mock_session')
+}
+
 async function mountStripeCheckout() {
   if (!user.value || !plan.value || checkoutMounted.value) return
 
-  // Mock mode: simulate checkout locally (no Stripe redirect)
+  // Mock mode: show the mock checkout UI (rendered in template)
   if (isMockMode) {
-    checkoutLoading.value = true
-    await new Promise(resolve => setTimeout(resolve, 800))
-    const authStore = useAuthStore()
-    if (authStore.user) {
-      authStore.setUser({
-        ...authStore.user,
-        subscriptionStatus: 'active',
-        stripeCustomerId: 'cus_mock_123',
-        stripeSubscriptionId: plan.value.mode === 'subscription' ? 'sub_mock_123' : undefined,
-        subscribedAt: new Date().toISOString(),
-        planType: plan.value.mode === 'payment' ? 'lifetime' : 'solo'
-      })
-      if (import.meta.client) {
-        localStorage.setItem('vault-mock-session', JSON.stringify(authStore.user))
-      }
-    }
-    checkoutLoading.value = false
-    await navigateTo('/checkout/return?session_id=mock_session')
+    checkoutMounted.value = true
     return
   }
 
@@ -402,9 +404,15 @@ const breadcrumbItems = computed(() => [
 
       <!-- Step 2: Stripe Embedded Checkout -->
       <div v-if="currentStep === 2">
+        <!-- Mock checkout UI -->
+        <CheckoutMock
+          v-if="isMockMode && checkoutMounted"
+          @complete="completeMockCheckout"
+        />
+
         <!-- Loading state -->
         <div
-          v-if="checkoutLoading"
+          v-else-if="checkoutLoading"
           class="flex flex-col items-center justify-center py-12 space-y-4"
         >
           <USkeleton class="h-10 w-full rounded-lg" />
@@ -417,7 +425,7 @@ const breadcrumbItems = computed(() => [
 
         <!-- Error state -->
         <div
-          v-if="checkoutError"
+          v-else-if="checkoutError"
           class="text-center py-12 space-y-4"
         >
           <UIcon
@@ -437,6 +445,7 @@ const breadcrumbItems = computed(() => [
 
         <!-- Stripe Embedded Checkout container -->
         <div
+          v-else
           id="stripe-checkout"
           class="rounded-xl overflow-hidden"
         />
