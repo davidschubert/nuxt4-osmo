@@ -511,7 +511,7 @@ const activeFaqItems = computed(() => {
         :links="[
           {
             label: 'Get Started',
-            to: '/try',
+            to: '/plans/subscription',
             trailingIcon: 'i-lucide-arrow-right',
             color: 'neutral' as const
           }

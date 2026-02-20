@@ -2,16 +2,6 @@
 defineProps<{
   resourceTitle?: string
 }>()
-
-const { isAuthenticated } = useAuth()
-
-function handleUpgrade() {
-  if (!isAuthenticated.value) {
-    navigateTo('/plans/subscription')
-  } else {
-    navigateTo('/plans/subscription')
-  }
-}
 </script>
 
 <template>
@@ -32,21 +22,12 @@ function handleUpgrade() {
           This resource is available to Pro members. Upgrade your plan to access the full code, preview, and documentation.
         </p>
       </div>
-      <div class="flex flex-col items-center gap-2">
-        <UButton
-          label="Upgrade to Pro"
-          trailing-icon="i-lucide-arrow-right"
-          size="lg"
-          @click="handleUpgrade"
-        />
-        <UButton
-          to="/plans"
-          variant="link"
-          color="neutral"
-          size="sm"
-          label="View plans"
-        />
-      </div>
+      <UButton
+        to="/plans"
+        label="View plans"
+        trailing-icon="i-lucide-arrow-right"
+        size="lg"
+      />
     </div>
   </div>
 </template>

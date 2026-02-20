@@ -31,11 +31,20 @@ const menuItems = computed(() => [
     type: 'label' as const
   }],
   // Navigation
-  [{
-    label: 'Settings',
-    icon: 'i-lucide-cog',
-    to: '/account'
-  }],
+  [
+    {
+      label: 'Settings',
+      icon: 'i-lucide-cog',
+      to: '/account'
+    },
+    ...(!authStore.isSubscribed
+      ? [{
+          label: 'Upgrade',
+          icon: 'i-lucide-sparkles',
+          to: '/plans'
+        }]
+      : [])
+  ],
   // Appearance toggle with switch
   [{
     label: colorMode.preference === 'dark' ? 'Dark Mode' : 'Light Mode',

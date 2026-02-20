@@ -18,6 +18,7 @@ const route = useRoute()
 const { register, loginWithOAuth, resendVerification, loading } = useAuth()
 
 const isVerifyPending = computed(() => route.query.verify === 'pending')
+const redirectTo = computed(() => (route.query.redirect as string) || undefined)
 const resending = ref(false)
 
 async function handleResend() {
@@ -79,7 +80,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
     name: payload.data.name,
     email: payload.data.email,
     password: payload.data.password
-  })
+  }, redirectTo.value ? { redirectTo: redirectTo.value } : undefined)
 }
 </script>
 
@@ -110,7 +111,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
             @click="handleResend"
           />
           <UButton
-            to="/vault"
+            :to="redirectTo || '/vault'"
             label="Continue to Vault"
             color="primary"
           />
